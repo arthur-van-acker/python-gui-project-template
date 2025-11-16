@@ -46,3 +46,6 @@ htmlcov/
 
 # macOS noise
 .DS_Store
+
+# Youtube scripts
+.youtube/

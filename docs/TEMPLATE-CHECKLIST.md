@@ -1,96 +1,39 @@
 # Template Adoption Checklist
 
-Use this checklist when cloning the Tic Tac Toe template for a new product. Each section focuses on a single file (or tightly coupled file pair) so you can mark off the updates you complete. Keep the template9s architecture intact unless you intentionally change it and document the rationale in your own repo.
+Use this linear checklist when cloning the YourApp Starter template. Each task links to the exact file (or documentation section) that needs an edit. Work in order—rename → config → UI → installer → docs—so renames propagate cleanly and your installers/tests stay in sync.
 
 ---
 
-## LICENSE
-- [ ] Replace the copyright line with your organization and year.
-- [ ] Confirm the chosen license matches your distribution requirements.
-- [ ] If you change the license, update any license badges in `README.md` accordingly.
+## 1. Rename & Update Metadata
+- [ ] Update [`pyproject.toml`](../pyproject.toml) per the guidance in [README – Adopt This Template in Order](../README.md#adopt-this-template-in-order) (project name, description, version, authors, classifiers, entry points).
+- [ ] Rename the package folder (`src/tictactoe`) and adjust imports as described in [docs/TEMPLATE-USAGE-GUIDE – Rename the Template Safely](./TEMPLATE-USAGE-GUIDE.md#3-rename-the-template-safely).
+- [ ] Refresh the hero section and badges in [README – Project Goals](../README.md#-project-goals) to describe your product instead of the sample game.
 
-## README.md
-- [ ] Rename the project and refresh the hero description/screenshots.
-- [ ] Update badges (Python version, license, platform) to match your targets.
-- [ ] Rewrite the “Project Goals” and “Features” sections for your app.
-- [ ] Adjust quick-start instructions so they reference your distribution artifact names.
-- [ ] Verify architecture diagrams and directory listings reflect your layout after renaming packages.
+## 2. Configure Look, Feel, and Assets
+- [ ] Customize colors/fonts/copy in [`tictactoe.config.gui`](../src/tictactoe/config/gui.py) using the knobs highlighted in [README – Configuration Knobs You Can Toggle](../README.md#configuration-knobs-you-can-toggle).
+- [ ] Replace media inside [`src/tictactoe/assets/`](../src/tictactoe/assets/) (favicon, themes, extra files) and confirm `wheel-builder.bat` copies any new folders.
+- [ ] Document the available presets/env vars in [README – Choose a Frontend](../README.md#choose-a-frontend) after you rename them.
 
-## pyproject.toml
-- [ ] Update `[project]` metadata (`name`, `version`, `description`, `authors`, `urls`).
-- [ ] Confirm `requires-python` and dependency lists match your runtime needs.
-- [ ] Change the console entry point (under `[project.scripts]` or `[project.gui-scripts]`) to the new package/module name.
-- [ ] Review classifiers to ensure they describe your audience and license.
+## 3. Align Domain Logic & Frontends
+- [ ] Swap the sample rules inside [`tictactoe/domain/logic.py`](../src/tictactoe/domain/logic.py) and update usage in GUI/CLI modules as noted in [docs/TEMPLATE-USAGE-GUIDE – Keep the Architecture Contracts](./TEMPLATE-USAGE-GUIDE.md#4-keep-the-architecture-contracts).
+- [ ] Rewrite copy and behaviors in [`tictactoe/ui/gui/main.py`](../src/tictactoe/ui/gui/main.py) and [`tictactoe/ui/cli/main.py`](../src/tictactoe/ui/cli/main.py) while keeping `HeadlessGameView` + automation hooks.
+- [ ] Extend or prune the frontend dispatcher inside [`tictactoe/__main__.py`](../src/tictactoe/__main__.py) following [docs/TEMPLATE-USAGE-GUIDE – Leverage the Multi-Frontend Entry Point](./TEMPLATE-USAGE-GUIDE.md#5-leverage-the-multi-frontend-entry-point).
 
-## src/tictactoe/__init__.py & __main__.py
-- [ ] Rename the package folder (`tictactoe`) to your module name and fix imports.
-- [ ] Update `__all__`, version strings, and docstrings.
-- [ ] In `__main__.py`, rename CLI flags or environment variables if you change the UI selector names.
-- [ ] Register or remove frontends in the `FRONTENDS` dispatch map based on what you ship.
+## 4. Tests, Tooling, and CI
+- [ ] Update pytest fixtures/expected strings in [`tests/`](../tests/) so both `-m "not gui"` and `-m gui` suites pass with your domain (see [README – Required Tests & Quality Gates](../README.md#-required-tests--quality-gates)).
+- [ ] Keep formatter/linter/type-checker invocations in [`scripts/run-ci.ps1`](../scripts/run-ci.ps1) and [`scripts/run-ci.sh`](../scripts/run-ci.sh) aligned with your Python version/tooling.
+- [ ] Re-run `pwsh scripts/run-ci.ps1` (or the Bash equivalent) before every release to catch installer regressions.
 
-## src/tictactoe/domain/logic.py
-- [ ] Replace the Tic Tac Toe rules with your own domain logic while keeping public APIs stable or updating every caller (`ui` packages and tests).
-- [ ] Ensure docstrings and type hints explain the new rules/state machine.
-- [ ] Add new unit tests in `tests/test_logic.py` for your rules.
+## 5. Installers & Distribution
+- [ ] Update [`wheel-builder.bat`](../wheel-builder.bat) to set the proper product metadata, shortcut names, smoke-test scripts, and helper docs for your brand.
+- [ ] Verify the generated `installation.bat` + `tic-tac-toe-starter.vbs` pair reflect your renamed package (see [docs/INSTALLATION-TECHNICAL-DETAILS.md](./INSTALLATION-TECHNICAL-DETAILS.md) for the flow you must keep in sync).
+- [ ] Double-check `dist/assets/`, `license.txt`, and `how-to-install-me.txt` for wording that mentions the sample app.
 
-## src/tictactoe/config/gui.py
-- [ ] Update dataclass defaults (colors, fonts, copy) for your brand.
-- [ ] Remove unused config fields or add new ones; document them in `README.md`.
-- [ ] Propagate config changes into `ui/gui` so widgets consume the new options.
-
-## src/tictactoe/assets/
-- [ ] Replace `favicon.ico` and any other bundled media with your branding.
-- [ ] Verify `wheel-builder.bat` copies any new assets into `dist/`.
-- [ ] If you add fonts/images, update `pyproject.toml` and `MANIFEST.in` (if applicable) to include them in the wheel.
-
-## src/tictactoe/ui/gui/main.py & view.py
-- [ ] Update window titles, status text, and callbacks to speak your domain language.
-- [ ] Confirm `HeadlessGameView` still mirrors the live widgets for CI use.
-- [ ] Wire in any new controllers or services but keep the view adapter pattern intact.
-
-## src/tictactoe/ui/cli/main.py
-- [ ] Rewrite prompts and output strings for your game/app.
-- [ ] Maintain CLI arguments (`--ui`, `--script`, etc.) or document breaking changes.
-- [ ] Update tests in `tests/test_cli.py` as needed.
-
-## docs/INSTALLATION-GUIDE.md
-- [ ] Replace screenshots, file names, and installer copy with your branding.
-- [ ] Ensure OS requirements, shortcut names, and uninstall steps match your installer behavior.
-- [ ] Link to your public support resources.
-
-## docs/INSTALLATION-TECHNICAL-DETAILS.md
-- [ ] Document any modifications to `installation.bat`, VBS scripts, or environment layout.
-- [ ] Call out additional dependencies (e.g., system packages, GPU drivers).
-- [ ] Note any security considerations (code signing, antivirus exceptions, etc.).
-
-## docs/TESTING.md
-- [ ] Align the documented test matrix with the suites you run (pytest markers, tox environments, GUI smoke tests).
-- [ ] Update instructions for running tests locally and in CI.
-
-## wheel-builder.bat
-- [ ] Search-and-replace `ttt.v0.1.0` and other paths with your package/version.
-- [ ] Update shortcut names, icon references, and any hard-coded wheel filenames.
-- [ ] Review the generated `license.txt` and `how-to-install-me.txt` sections for accuracy.
-- [ ] If you add new artifacts, append copy steps or creation blocks.
-
-## docs/TEMPLATE-USAGE-GUIDE.md
-- [ ] Decide whether to keep this file for contributors; if so, rewrite it with guidance specific to your template.
-- [ ] If you remove it, reference the replacement in the README so future template users know where to start.
-
-## scripts/run-ci.ps1 & run-ci.sh
-- [ ] Adapt environment bootstrap commands (Python version, poetry/uv/pip usage).
-- [ ] Keep parity between PowerShell and Bash versions for cross-platform CI.
-
-## tests/
-- [ ] Update fixtures and expected strings after renaming packages or changing domain logic.
-- [ ] Add coverage for any new modules you introduce.
-- [ ] Ensure GUI tests still run headless (markers/types in `pytest.ini`).
-
-## installers (installation.bat, tic-tac-toe-starter.vbs)
-- [ ] Rename shortcut labels, window titles, and target paths.
-- [ ] Confirm the VBS launcher points to your package module.
-- [ ] If you add post-install tasks (config files, telemetry opt-in), script them here and document the behavior.
+## 6. Documentation & Support Material
+- [ ] Rewrite [README – Distribution & Installation](../README.md#-distribution--installation) with your installer paths, shortcuts, and troubleshooting tips.
+- [ ] Update [docs/INSTALLATION-GUIDE.md](./INSTALLATION-GUIDE.md) and [docs/INSTALLATION-TECHNICAL-DETAILS.md](./INSTALLATION-TECHNICAL-DETAILS.md) to match the installer changes you made in step 5.
+- [ ] Decide whether to keep or rewrite [docs/TEMPLATE-USAGE-GUIDE.md](./TEMPLATE-USAGE-GUIDE.md#9-update-docs-for-your-audience) for future internal contributors; link to the replacement if you move it.
 
 ---
 
-**Tip:** When the checklist is complete, run `wheel-builder.bat`, execute the generated installer on a clean Windows profile, and perform a smoke test using the new desktop shortcut. Finally, update `TEMPLATE-CHECKLIST.md` with any project-specific steps you discovered so the next contributor benefits from your learnings.
+**Finish Line:** When every box is checked, run `wheel-builder.bat --ci --no-pause`, execute `installation.bat` on a clean profile, launch the desktop shortcut, and archive the updated `TEMPLATE-CHECKLIST.md` so the next adopter benefits from your edits.

@@ -1,6 +1,6 @@
-# Tic Tac Toe - Python GUI Project Template
+# YourApp Starter – Python GUI Template
 
-A modern, fully-featured Tic Tac Toe game built with Python and CustomTkinter. This project serves as a **comprehensive template for Python GUI applications**, demonstrating best practices for project structure, packaging, distribution, and installation.
+YourApp Starter is a CustomTkinter-based reference implementation that shows how to ship a polished Python desktop app with multiple frontends, theming hooks, and production-ready installers. The repo still bundles the Tic Tac Toe sample, but every file is structured so you can drop in your own domain logic without rewriting the infrastructure.
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-0BSD-green)
@@ -25,30 +25,27 @@ This project was created as a **reference template** for building professional P
 
 ---
 
-## 🎮 Features
+## 🎮 Template Highlights
 
-### Game Features
-- Classic Tic Tac Toe gameplay (3x3 grid)
-- Two-player mode (X vs O)
-- Win detection (rows, columns, diagonals)
-- Draw detection
-- Game reset functionality
-- Clean, modern UI with CustomTkinter
+### What You Can Reuse Immediately
+- **Multi-frontend dispatcher**: GUI, headless, CLI, and service entry points live behind `python -m tictactoe` so you can register more launchers without forking scripts.
+- **Typed theme/config layer**: `tictactoe.config.gui` exposes dataclasses for fonts, colors, copy, and layout; presets can be loaded from JSON or environment variables.
+- **Installer + launcher duo**: `wheel-builder.bat` outputs a version-stamped `installation.bat`, VBScript launcher, manifest, and helper docs with one command.
+- **CI rehearsal scripts**: `scripts/run-ci.ps1` and `.sh` run formatting, linting, typing, pytest (GUI + non-GUI), and installer smoke tests locally or in automation.
+- **Headless GUI adapter**: `HeadlessGameView` mirrors widget telemetry so GUI smoke tests run in CI without a Tk display.
 
-### Technical Features
-- **Isolated Installation**: Uses virtual environment (no global dependency conflicts)
-- **Windows Integration**: Custom icons for desktop, titlebar, and taskbar
-- **One-Click Installation**: Automated installer with automatic updates
-- **Professional Packaging**: Wheel distribution for easy deployment
-- **Clean Uninstall**: Simple folder deletion removes everything
-- **OneDrive Compatible**: Smart desktop path detection
+### Why Teams Adopt It
+- **Isolated installations** prevent global Python conflicts and mimic end-user environments.
+- **Desktop integration** (shortcut, icon, VBScript launcher) demonstrates how to feel native on Windows.
+- **Environment-driven configuration** keeps installers/CI in sync with runtime features like themes or automation scripts.
+- **Docs-first approach** means README + deep dives already describe packaging, configuration, and adoption steps for your future contributors.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-tic-tac-toe/
+yourapp-starter/
 ├── src/
 │   └── tictactoe/
 │       ├── __init__.py
@@ -83,7 +80,7 @@ Architecture: MVC-inspired separation
 
 ### For Users
 
-1. **Download** the latest release (tic-tac-toe.zip)
+1. **Download** the latest sample release (`yourapp-starter.zip`)
 2. **Extract** the ZIP file
 3. **Run** `installation.bat`
 4. **Launch** from desktop shortcut
@@ -101,7 +98,7 @@ See [INSTALLATION-GUIDE.md](docs/INSTALLATION-GUIDE.md) for detailed instruction
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd tic-tac-toe
+cd yourapp-starter
 
 # Create virtual environment
 python -m venv .venv
@@ -123,7 +120,7 @@ pip install -r requirements.txt
 # Activate virtual environment first
 .venv\Scripts\activate
 
-# Run the game
+# Run the bundled sample app
 python -m tictactoe
 # or
 tictactoe
@@ -200,6 +197,19 @@ PY
 When you don't want to pass CLI flags, switch to the service frontend (`--ui service`) 
 and configure the environment variables above. This is handy for installer smoke
 tests or GitHub Actions jobs that already manage state through env vars.
+
+### Adopt This Template in Order
+
+| Step | Files to touch | What to change |
+| --- | --- | --- |
+| 1. Rename the package | `pyproject.toml`, `src/tictactoe/`, `README.md` | Update `[project]` metadata, rename the package directory, adjust imports/entry points, and rewrite the hero copy for your product. |
+| 2. Refresh configs & assets | `tictactoe.config.gui`, `src/tictactoe/assets/` | Replace fonts/colors/texts via `GameViewConfig`, swap `favicon.ico`, and add any extra assets you plan to copy into the installer bundle. |
+| 3. Align UIs & controllers | `tictactoe.ui.gui.*`, `tictactoe.ui.cli.main`, `tictactoe.domain.logic` | Rework copy, widgets, or domain actions to match your app while keeping `HeadlessGameView` + CLI automation helpers intact. |
+| 4. Update installers | `wheel-builder.bat`, generated `installation.bat`, `tic-tac-toe-starter.vbs` | Change shortcut names, manifest metadata, and smoke-test scripts; rerun `wheel-builder.bat --ci --no-pause` to verify. |
+| 5. Lock quality gates | `scripts/run-ci.ps1`, `scripts/run-ci.sh`, `tests/` | Keep the formatter/linter/type checker suites, expand pytest coverage for your modules, and ensure GUI markers still pass headless. |
+
+Each step links back into the deeper docs in `docs/TEMPLATE-USAGE-GUIDE.md` and
+`docs/TEMPLATE-CHECKLIST.md`, so contributors can follow the same adoption path.
 
 #### Swap the View Adapter
 
@@ -315,9 +325,9 @@ For technical details, see [INSTALLATION-TECHNICAL-DETAILS.md](docs/INSTALLATION
 - **AppUserModelID**: Proper Windows taskbar integration
 - **Automated Installer**: One-click installation experience
 
-### Tuning the GUI Theme & Layout
+### Configuration Knobs You Can Toggle
 
-All fonts, strings, dimensions, and color hooks for the CustomTkinter frontend now live in `tictactoe.config.gui`. Inject a `GameViewConfig` (and optionally a `WindowConfig`) into `TicTacToeGUI` to reskin or resize the app without touching the widget code:
+All fonts, strings, dimensions, and color hooks for the CustomTkinter frontend live in `tictactoe.config.gui`. Inject a `GameViewConfig` (and optionally a `WindowConfig`) into `TicTacToeGUI` to reskin or resize the app without touching the widget code:
 
 ```python
 from tictactoe.config import (
@@ -342,7 +352,7 @@ view_config = GameViewConfig(
       cell_spacing=8,
    ),
    text=TextConfig(
-      title="Ultimate Tic Tac Toe",
+      title="Ultimate YourApp",
       reset_button="Play Again",
       win_message_template="Congrats {winner}!",
    ),
@@ -354,7 +364,7 @@ view_config = GameViewConfig(
    ),
 )
 
-window_config = WindowConfig(title="Ultimate Tic Tac Toe", geometry="500x720")
+window_config = WindowConfig(title="Ultimate YourApp", geometry="500x720")
 
 app = TicTacToeGUI(view_config=view_config, window_config=window_config)
 app.run()
@@ -372,11 +382,11 @@ Every field is optional; omit keys you do not want to override. Because the conf
 
 ---
 
-## 🧪 Testing & Quality
+## 🧪 Required Tests & Quality Gates
 
-- Tests enforce a **minimum 50% coverage** (measured automatically via `pytest`).
-- GUI tests run in headless mode by default (set `TICTACTOE_HEADLESS=1`).
-- GitHub Actions runs the same commands plus a release smoke test on every push/PR.
+- Keep coverage-focused pytest suites (headless + GUI markers) so domain and UI regressions are caught before shipping.
+- Always run the formatter (`black`), linter (`ruff`), and type checker (`mypy`) before pushing.
+- Mirror the local CI scripts (`scripts/run-ci.ps1` / `.sh`) inside your automation so installer smoke tests stay representative.
 
 ```pwsh
 # Run the default non-GUI suite with coverage

@@ -1,6 +1,6 @@
 # Template Usage Guide & Design Rationale
 
-This document walks you through adopting the Tic Tac Toe template for your own CustomTkinter projects and details the engineering decisions baked into the current setup. Follow the steps in order; each stage explains *what* to do and *why* the template encourages that workflow.
+This document walks you through adopting the YourApp Starter template for your own CustomTkinter projects and details the engineering decisions baked into the current setup. Follow the steps in order; each stage explains *what* to do and *why* the template encourages that workflow.
 
 ---
 
@@ -46,7 +46,7 @@ The template follows an MVC-inspired split:
 - `config/`: Typed dataclasses controlling visuals and copy.
 
 **Steps:**
-1. Replace the logic module with your own business rules while preserving the existing public API (`GameState`, `make_move`, etc.) or refactor both domain and UI together.
+1. Replace the sample Tic Tac Toe logic with your own business rules while preserving the existing public API (`GameState`, `make_move`, etc.) or refactor both domain and UI together so the contracts stay aligned.
 2. Customize GUI behavior through `tictactoe.ui.gui.view` and `tictactoe.ui.gui.main`, keeping `HeadlessGameView` intact for tests.
 3. Extend or replace the CLI client under `tictactoe.ui.cli.main` if you need automation hooks.
 
@@ -56,7 +56,7 @@ The template follows an MVC-inspired split:
 
 ## 5. Leverage the Multi-Frontend Entry Point
 
-`python -m tictactoe` is a dispatcher that selects a frontend via `--ui` or environment variables.
+`python -m tictactoe` (rename this module after cloning) is a dispatcher that selects a frontend via `--ui` or environment variables.
 
 **How to adapt it:**
 1. Register new frontends in `tictactoe.__main__.py` by extending the `FRONTENDS` map.

@@ -25,6 +25,7 @@ Keep the repository focused on being a reusable CustomTkinter starter kit instea
 ## 5. Rewrite Docs for Template Users
 - Refresh `README.md`, `docs/TEMPLATE-USAGE-GUIDE.md`, and `docs/TEMPLATE-CHECKLIST.md` to speak about "YourApp Starter" instead of Tic Tac Toe, explicitly calling out the rename steps, config knobs, and required tests.
 - Link each checklist item to the exact file/section to edit, making the adoption flow linear (rename → config → UI → installer → docs) so contributors can track progress at a glance.
+- ✅ Implemented: `README.md` now leads with the YourApp Starter branding, adds an adoption roadmap, and highlights the required config knobs/tests. `docs/TEMPLATE-USAGE-GUIDE.md` explains how to rename the package and swap the sample logic, while `docs/TEMPLATE-CHECKLIST.md` is reorganized into a linear workflow with direct links to the referenced files/sections.
 
 ## 6. Optional Stretch Ideas
 - Provide a `controller/` package stub and show how to register telemetry/logging hooks in `ui/gui/main.py`.

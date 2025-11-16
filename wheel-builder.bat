@@ -182,9 +182,9 @@ REM Write launcher script (relative paths)
 REM ---------------------------------------------------------------------------
 (
 echo Dim fso, root, shell
-echo Set fso = CreateObject("Scripting.FileSystemObject")
-echo root = fso.GetParentFolderName(WScript.ScriptFullName)
-echo Set shell = CreateObject("WScript.Shell")
+echo Set fso = CreateObject("Scripting.FileSystemObject"^)
+echo root = fso.GetParentFolderName(WScript.ScriptFullName^)
+echo Set shell = CreateObject("WScript.Shell"^)
 echo shell.Run """" ^& root ^& "\\.venv\\Scripts\\pythonw.exe"" -m tictactoe", 0
 echo Set shell = Nothing
 echo Set fso = Nothing
@@ -195,7 +195,7 @@ REM Documentation artifacts
 REM ---------------------------------------------------------------------------
 (
 echo %PRODUCT_NAME% Template
-echo Copyright (c) 2025 Arthur van Acker
+echo Copyright ^(c^) 2025 Arthur van Acker
 echo.
 echo Permission to use, copy, modify, and/or distribute this software for any
 echo purpose with or without fee is hereby granted.
@@ -222,9 +222,9 @@ echo What the installer does
 echo -----------------------
 echo - Installs into %%LOCALAPPDATA%%\Programs\%INSTALL_DIR_NAME% by default.
 echo - Creates a private virtual environment and installs %WHEEL_FILE%.
-echo - Copies assets (icons, JSON, etc.) beside the binaries.
-echo - Runs a non-interactive smoke test (`python -m tictactoe --ui service`).
-echo - Drops a JSON manifest (`install-info.json`) for inventory scripts.
+echo - Copies assets ^(icons, JSON, etc.^) beside the binaries.
+echo - Runs a non-interactive smoke test ^(`python -m tictactoe --ui service`^).
+echo - Drops a JSON manifest ^(`install-info.json`^) for inventory scripts.
 echo.
 echo Need screenshots or troubleshooting tips?
 echo https://github.com/arthur-van-acker/tic-tac-toe/blob/main/docs/INSTALLATION-GUIDE.md

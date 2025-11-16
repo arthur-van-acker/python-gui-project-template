@@ -26,9 +26,9 @@ This template layers the application so domain logic, presentation, configuratio
 ```
 
 ## Domain Layer
-- `tictactoe.domain.logic.TicTacToe` owns the canonical board state and rules.
-- Emits `GameSnapshot` instances when moves occur; UI layers subscribe via `add_listener`.
-- Replace this module when building a new game but maintain the snapshot contract or update all listeners.
+- `tictactoe.domain.logic.TicTacToe` now ships as a neutral placeholder: it publishes `ExampleState` snapshots with TODO notes and raises `NotImplementedError` from `dispatch_action` until you plug in real business rules.
+- Use the placeholder to document controller contracts, then extend or replace `dispatch_action` so the GUI/CLI surfaces keep working without structural changes.
+- Listeners still consume `GameSnapshot` objects, letting you evolve the domain independently from the presentation layer.
 
 ## GUI Layer
 - `TicTacToeGUI` composes the domain object, loads CustomTkinter via `ui.gui.bootstrap`, and instantiates a view through `view_factory`.
@@ -45,7 +45,7 @@ This template layers the application so domain logic, presentation, configuratio
 
 ## Installer & Distribution
 - `wheel-builder.bat` orchestrates builds, copies assets, and generates helper scripts inside `dist/`.
-- `installation.bat` provisions a per-user install under `%LOCALAPPDATA%\Programs\ttt.v0.1.0`, creates a virtual environment, installs the wheel, and registers shortcuts via `tic-tac-toe-starter.vbs`.
+- `installation.bat` provisions a per-user install under `%LOCALAPPDATA%\Programs\yourapp-starter-<version>` (or `%TEMP%` when built with `--ci`), creates a virtual environment, installs the wheel, and registers shortcuts via `tic-tac-toe-starter.vbs`.
 - All desktop integration logic lives in batch/VBScript so the Python package stays pure.
 
 ## Extensibility Hooks

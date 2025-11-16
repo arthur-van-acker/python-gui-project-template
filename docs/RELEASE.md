@@ -7,7 +7,7 @@ Follow this checklist whenever you cut a new template release so downstream user
 2. Update `pyproject.toml`:
    - Bump `version`.
    - Refresh `[project.urls]` and metadata if necessary.
-3. Update `README.md` badges (version tag) and any docs referencing the version number (`wheel-builder.bat` embeds `ttt.v0.1.0`).
+3. Update `README.md` badges (version tag) and any docs referencing the version number (`wheel-builder.bat` currently stamps `yourapp-starter-<version>` into the installer templates).
 4. Regenerate `CHANGELOG.md` (if applicable) and mention new features/fixes.
 
 ## 2. Run Quality Gates
@@ -31,7 +31,7 @@ These commands:
    - Clean `dist/` and previous build outputs.
    - Invoke `python -m build --wheel` producing `tictactoe-<version>-py3-none-any.whl`.
    - Copy `favicon.ico` and auto-generate helper docs (`license.txt`, `how-to-install-me.txt`).
-   - Emit `installation.bat` and `tic-tac-toe-starter.vbs` tailored to `%LOCALAPPDATA%\Programs\ttt.vX.Y.Z`.
+   - Emit `installation.bat` and `tic-tac-toe-starter.vbs` tailored to `%LOCALAPPDATA%\Programs\yourapp-starter-<version>` (or `%TEMP%` in CI mode).
 3. Inspect `dist/`:
    - Wheel file.
    - `installation.bat`.
@@ -44,7 +44,7 @@ These commands:
 3. Launch the app via the desktop shortcut and ensure:
    - Icons render correctly.
    - GUI + CLI entry points function.
-   - Uninstall (delete `%LOCALAPPDATA%\Programs\ttt.vX.Y.Z` and shortcut) works without leftover files.
+   - Uninstall (delete `%LOCALAPPDATA%\Programs\yourapp-starter-<version>` and the desktop shortcut) works without leftover files.
 
 ## 5. Optional Code Signing
 If your organization signs scripts/executables:

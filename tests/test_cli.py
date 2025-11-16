@@ -81,6 +81,46 @@ def test_service_frontend_invoked(monkeypatch):
     assert called["count"] == 1
 
 
+def test_gui_theme_flag_sets_payload(monkeypatch):
+    gui_module = import_module("tictactoe.ui.gui.main")
+    called = {"payload": None}
+
+    def fake_main():
+        called["payload"] = os.environ.get("TICTACTOE_THEME_PAYLOAD")
+        return 0
+
+    monkeypatch.setattr(gui_module, "main", fake_main)
+    monkeypatch.delenv("TICTACTOE_THEME_PAYLOAD", raising=False)
+
+    cli_module = _reload_cli_module()
+    cli_module.main(["--ui", "gui", "--theme", "dark"])
+
+    assert called["payload"] is not None
+    data = json.loads(called["payload"])
+    assert data["text"]["title"] == "YourApp Starter (Dark)"
+
+
+def test_gui_theme_file_sets_payload(monkeypatch, tmp_path):
+    gui_module = import_module("tictactoe.ui.gui.main")
+    called = {"payload": None}
+
+    def fake_main():
+        called["payload"] = os.environ.get("TICTACTOE_THEME_PAYLOAD")
+        return 0
+
+    monkeypatch.setattr(gui_module, "main", fake_main)
+    monkeypatch.delenv("TICTACTOE_THEME_PAYLOAD", raising=False)
+
+    theme_file = tmp_path / "theme.json"
+    theme_file.write_text(json.dumps({"text": {"title": "File Theme"}}), encoding="utf-8")
+
+    cli_module = _reload_cli_module()
+    cli_module.main(["--ui", "gui", "--theme-file", str(theme_file)])
+
+    data = json.loads(called["payload"])
+    assert data["text"]["title"] == "File Theme"
+
+
 def test_cli_list_frontends(capsys):
     cli_module = _reload_cli_module()
     result = cli_module.main(["--list-frontends"])

@@ -147,6 +147,12 @@ python -m tictactoe --ui cli
 # Launch the headless automation/service runner
 python -m tictactoe --ui service
 
+# Launch the GUI with the bundled "dark" theme
+python -m tictactoe --ui gui --theme dark
+
+# Load a JSON theme config from disk
+python -m tictactoe --ui gui --theme-file themes/enterprise.json
+
 # List every registered frontend
 python -m tictactoe --list-frontends
 ```
@@ -157,6 +163,9 @@ Environment variables offer zero-touch overrides for installers or CI:
 | --- | --- | --- |
 | `TICTACTOE_UI` | `gui`, `cli`, `headless`, `service` | Forces a frontend when no flag is provided. |
 | `TICTACTOE_HEADLESS` | `0` / `1` | Still respected by the GUI to load the shim widgets in tests. |
+| `TICTACTOE_THEME` | `default`, `light`, `dark`, `enterprise`, ... | Selects a named preset from `tictactoe.config.gui.NAMED_THEMES`. |
+| `TICTACTOE_THEME_FILE` | filesystem path | Points to a JSON file containing `GameViewConfig` data. |
+| `TICTACTOE_THEME_PAYLOAD` | JSON string (internal) | Automatically managed when using `--theme` / `--theme-file`; can be set manually for advanced flows. |
 | `TICTACTOE_SCRIPT` | comma-separated moves | Consumed by the service frontend to drive automation runs. |
 | `TICTACTOE_SCRIPT_FILE` | filesystem path | Alternative to `TICTACTOE_SCRIPT` if you store scripts in files. |
 | `TICTACTOE_AUTOMATION_OUTPUT` | filesystem path | Where automation results are written as JSON. |
@@ -176,6 +185,16 @@ python -m tictactoe.ui.cli.main --script 0,4,8 --output-json artifacts/automatio
 
 # Load moves from a file and tag the run for dashboards
 python -m tictactoe.ui.cli.main --script-file scripts/demo.moves --label nightly-seed
+
+# Serialize a theme preset to disk for editing
+python - <<"PY"
+from pathlib import Path
+from tictactoe.config.gui import serialize_game_view_config, get_theme
+Path("themes/dark.json").write_text(
+   __import__("json").dumps(serialize_game_view_config(get_theme("dark")), indent=2),
+   encoding="utf-8",
+)
+PY
 ```
 
 When you don't want to pass CLI flags, switch to the service frontend (`--ui service`) 

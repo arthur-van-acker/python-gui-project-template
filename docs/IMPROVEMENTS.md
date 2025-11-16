@@ -15,6 +15,7 @@ Keep the repository focused on being a reusable CustomTkinter starter kit instea
 ## 3. Promote Configuration to Named Themes
 - In `tictactoe.config.gui`, bundle at least two `GameViewConfig` presets (e.g., `LightTheme`, `DarkTheme`, `EnterpriseBrand`) and describe them in `docs/CONFIGURATION.md` with before/after screenshots when possible.
 - Teach `tictactoe.__main__` to load themes from environment variables or JSON files so adopters can see runtime theming patterns without editing widget code.
+- ✅ Implemented: Added `NAMED_THEMES`, serialization helpers, README/CONFIGURATION docs, and updated `tictactoe.__main__`/GUI bootstrap to honor `--theme`, `--theme-file`, and `TICTACTOE_THEME*` environment variables.
 
 ## 4. Make Distribution & CI Match Real Products
 - Update `wheel-builder.bat`, `installation.bat`, and `tic-tac-toe-starter.vbs` to demonstrate version stamping, custom shortcut names, asset copying, and a smoke-test hook executed after install.

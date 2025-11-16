@@ -81,7 +81,49 @@ TicTacToeGUI(view_config=highlight_theme)
 
 ## Supplying Config at Runtime
 1. **Code Injection:** Pass `window_config` / `view_config` directly into `TicTacToeGUI` when constructing custom launchers.
-2. **Environment Variables:** Extend `tictactoe.__main__` to parse theme names (e.g., `TICTACTOE_THEME=solarized`). Resolve the theme into a `GameViewConfig` instance before creating the GUI.
-3. **Serialized Settings:** Convert dataclasses to dictionaries with `dataclasses.asdict()` and persist as JSON/YAML. Load at startup and rebuild the dataclasses (all fields are plain Python types).
+2. **Environment Variables:** Use `python -m tictactoe --theme dark` or set `TICTACTOE_THEME/TICTACTOE_THEME_FILE` so `__main__` injects the serialized payload automatically.
+3. **Serialized Settings:** Convert dataclasses to dictionaries with `serialize_game_view_config()` and persist as JSON/YAML. Load at startup and rebuild the dataclasses with `deserialize_game_view_config()`.
 
 By keeping every visual tweak inside these dataclasses, you can offer end users advanced theming without touching widget code, and write automated tests that ensure themes stay consistent across releases.
+
+## Named Themes & Serialization
+
+The template now bundles a few presets under `tictactoe.config.gui.NAMED_THEMES`:
+
+| Theme | Description |
+| --- | --- |
+| `default` | Matches the original Tic Tac Toe sample colors. |
+| `light` | Neutral grays for dashboards and screenshots. |
+| `dark` | High-contrast palette with alternate button text. |
+| `enterprise` | Blue-forward palette with increased padding. |
+
+Use the public helpers to discover, serialize, and rebuild themes:
+
+```python
+from pathlib import Path
+from tictactoe.config.gui import (
+    deserialize_game_view_config,
+    get_theme,
+    list_themes,
+    serialize_game_view_config,
+)
+
+print(list_themes())               # ['dark', 'default', 'enterprise', 'light']
+payload = serialize_game_view_config(get_theme("dark"))
+Path("theme.json").write_text(__import__("json").dumps(payload, indent=2))
+
+theme_dict = __import__("json").loads(Path("theme.json").read_text())
+config = deserialize_game_view_config(theme_dict)
+```
+
+### Runtime Loading
+
+`python -m tictactoe` understands the following CLI flags and environment variables:
+
+| Flag / Variable | Purpose |
+| --- | --- |
+| `--theme` / `TICTACTOE_THEME` | Resolves a preset by name. |
+| `--theme-file` / `TICTACTOE_THEME_FILE` | Reads a JSON file containing serialized `GameViewConfig` data. |
+| `TICTACTOE_THEME_PAYLOAD` | (Advanced) Direct JSON blob consumed by the GUI; managed automatically when using the options above. |
+
+When the GUI (or headless GUI) launches, it inspects `TICTACTOE_THEME_PAYLOAD` and rebuilds the dataclasses via `deserialize_game_view_config`. This keeps installers and CI jobs theme-aware without touching widget code.

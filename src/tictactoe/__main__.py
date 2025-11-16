@@ -4,15 +4,20 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import json
 import os
 import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Callable, Mapping, MutableMapping, Optional, Sequence, cast
 
 FrontendRunner = Callable[[], Optional[int]]
 
 _FRONTEND_ENV_VAR = "TICTACTOE_UI"
 _DEFAULT_FRONTEND = "gui"
+_THEME_ENV_VAR = "TICTACTOE_THEME"
+_THEME_FILE_ENV_VAR = "TICTACTOE_THEME_FILE"
+_THEME_PAYLOAD_ENV_VAR = "TICTACTOE_THEME_PAYLOAD"
 
 
 @dataclass(frozen=True)
@@ -79,6 +84,18 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="List the available frontends without launching the app.",
     )
+    parser.add_argument(
+        "--theme",
+        help=(
+            "Theme name registered in tictactoe.config.gui.NAMED_THEMES. "
+            "Overrides the TICTACTOE_THEME environment variable."
+        ),
+    )
+    parser.add_argument(
+        "--theme-file",
+        type=Path,
+        help="Path to a JSON file that stores a serialized GameViewConfig.",
+    )
     return parser
 
 
@@ -108,6 +125,39 @@ def _apply_env_overrides(overrides: Mapping[str, str]) -> None:
         os.environ[key] = value
 
 
+def _load_theme_from_json(path: Path) -> Optional[Mapping[str, Any]]:
+    if not path.exists():
+        raise FileNotFoundError(path)
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def _resolve_theme_payload(args) -> Optional[Mapping[str, Any]]:
+    from tictactoe.config.gui import get_theme, serialize_game_view_config
+
+    theme_file = args.theme_file or os.environ.get(_THEME_FILE_ENV_VAR)
+    if theme_file:
+        return _load_theme_from_json(Path(theme_file))
+
+    theme_name = args.theme or os.environ.get(_THEME_ENV_VAR)
+    if theme_name:
+        config = get_theme(theme_name)
+        return serialize_game_view_config(config)
+
+    payload = os.environ.get(_THEME_PAYLOAD_ENV_VAR)
+    if payload:
+        return json.loads(payload)
+
+    return None
+
+
+def _set_theme_payload_env(payload: Optional[Mapping[str, Any]]) -> None:
+    if payload is None:
+        os.environ.pop(_THEME_PAYLOAD_ENV_VAR, None)
+        return
+    os.environ[_THEME_PAYLOAD_ENV_VAR] = json.dumps(payload)
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """Entry point for launching the requested frontend."""
 
@@ -121,6 +171,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     frontend = _determine_frontend(args.ui)
     _apply_env_overrides(frontend.env_overrides)
     runner = frontend.load()
+    if frontend.target.startswith("tictactoe.ui.gui"):
+        _set_theme_payload_env(_resolve_theme_payload(args))
+    else:
+        _set_theme_payload_env(None)
     result = runner()
     return int(result) if isinstance(result, int) else 0
 

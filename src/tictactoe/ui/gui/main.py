@@ -1,8 +1,12 @@
 """GUI implementation for Tic Tac Toe using CustomTkinter."""
 
+from __future__ import annotations
+
+import json
+import os
 from typing import Any, Callable, Optional, Protocol
 
-from tictactoe.config import GameViewConfig, WindowConfig
+from tictactoe.config import GameViewConfig, WindowConfig, deserialize_game_view_config
 from tictactoe.domain.logic import GameSnapshot, TicTacToe
 from tictactoe.ui.gui import bootstrap
 from tictactoe.ui.gui.contracts import GameViewPort
@@ -10,6 +14,21 @@ from tictactoe.ui.gui.theme import apply_default_theme
 from tictactoe.ui.gui.view import GameView
 
 bootstrap.configure_windows_app_model()
+
+_THEME_PAYLOAD_ENV_VAR = "TICTACTOE_THEME_PAYLOAD"
+def _theme_from_env() -> Optional[GameViewConfig]:
+    payload = os.environ.get(_THEME_PAYLOAD_ENV_VAR)
+    if not payload:
+        return None
+    try:
+        data = json.loads(payload)
+    except json.JSONDecodeError:
+        return None
+    try:
+        return deserialize_game_view_config(data)
+    except Exception:
+        return None
+
 
 
 GameFactory = Callable[[], TicTacToe]
@@ -62,7 +81,8 @@ class TicTacToeGUI:
         self._game_factory = game_factory or TicTacToe
         self._view_factory = view_factory or _build_default_view
         self.window_config = window_config or WindowConfig()
-        self.view_config = view_config or GameViewConfig()
+        env_view_config = _theme_from_env()
+        self.view_config = view_config or env_view_config or GameViewConfig()
 
         self.game = self._game_factory()
         self._ctk_env = bootstrap.load_customtkinter()

@@ -156,10 +156,15 @@ def serialize_game_view_config(config: GameViewConfig) -> Dict[str, Any]:
 def _font_spec_from(data: Mapping[str, Any] | None, fallback: FontSpec) -> FontSpec:
     if not data:
         return fallback
-    return FontSpec(size=data.get("size", fallback.size), weight=data.get("weight", fallback.weight))
+    return FontSpec(
+        size=data.get("size", fallback.size),
+        weight=data.get("weight", fallback.weight),
+    )
 
 
-def _layout_from(data: Mapping[str, Any] | None, fallback: LayoutConfig) -> LayoutConfig:
+def _layout_from(
+    data: Mapping[str, Any] | None, fallback: LayoutConfig
+) -> LayoutConfig:
     if not data:
         return fallback
     return LayoutConfig(
@@ -179,8 +184,12 @@ def _text_from(data: Mapping[str, Any] | None, fallback: TextConfig) -> TextConf
         title=data.get("title", fallback.title),
         reset_button=data.get("reset_button", fallback.reset_button),
         draw_message=data.get("draw_message", fallback.draw_message),
-        win_message_template=data.get("win_message_template", fallback.win_message_template),
-        turn_message_template=data.get("turn_message_template", fallback.turn_message_template),
+        win_message_template=data.get(
+            "win_message_template", fallback.win_message_template
+        ),
+        turn_message_template=data.get(
+            "turn_message_template", fallback.turn_message_template
+        ),
     )
 
 

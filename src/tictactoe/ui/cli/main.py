@@ -33,13 +33,17 @@ def _env_controller_hooks(flag: str = _CLI_TELEMETRY_ENV_VAR) -> ControllerHooks
     return logging_hooks() if telemetry_logging_requested(flag) else None
 
 
-def _emit_view_event(hooks: ControllerHooks | None, action: str, **payload: Any) -> None:
+def _emit_view_event(
+    hooks: ControllerHooks | None, action: str, **payload: Any
+) -> None:
     if not hooks:
         return
     hooks.emit("view", action, **payload)
 
 
-def _emit_domain_event(hooks: ControllerHooks | None, action: str, **payload: Any) -> None:
+def _emit_domain_event(
+    hooks: ControllerHooks | None, action: str, **payload: Any
+) -> None:
     if not hooks:
         return
     hooks.emit("domain", action, **payload)
@@ -203,7 +207,10 @@ def _print_placeholder_help() -> None:
     snapshot = game.snapshot
     print("Template CLI placeholder – pass --script or --script-file to see how")
     print("automation data can be captured for CI or batch tooling.")
-    print(f"ExampleState snapshot: board={len(snapshot.board)} cells, state={snapshot.state.value}")
+    print(
+        "ExampleState snapshot: board="
+        f"{len(snapshot.board)} cells, state={snapshot.state.value}"
+    )
     if snapshot.notes:
         print("Snapshot notes:")
         for note in snapshot.notes:

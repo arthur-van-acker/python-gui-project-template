@@ -9,7 +9,7 @@ import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Mapping, MutableMapping, Optional, Sequence, cast
+from typing import Any, Callable, Mapping, MutableMapping, Optional, Sequence, cast
 
 FrontendRunner = Callable[[], Optional[int]]
 

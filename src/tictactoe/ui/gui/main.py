@@ -6,12 +6,12 @@ import json
 import os
 from typing import Any, Callable, Optional, Protocol
 
+from tictactoe.config import GameViewConfig, WindowConfig, deserialize_game_view_config
 from tictactoe.controller import (
     ControllerHooks,
     logging_hooks,
     telemetry_logging_requested,
 )
-from tictactoe.config import GameViewConfig, WindowConfig, deserialize_game_view_config
 from tictactoe.domain.logic import GameSnapshot, TicTacToe
 from tictactoe.ui.gui import bootstrap
 from tictactoe.ui.gui.contracts import GameViewPort

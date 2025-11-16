@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 from .gui import (
+    NAMED_THEMES,
     ColorConfig,
     FontConfig,
     FontSpec,
     GameViewConfig,
     LayoutConfig,
-    NAMED_THEMES,
-    deserialize_game_view_config,
     TextConfig,
     WindowConfig,
+    deserialize_game_view_config,
     get_theme,
     list_themes,
     serialize_game_view_config,

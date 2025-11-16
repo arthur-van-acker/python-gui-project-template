@@ -42,7 +42,9 @@ class ControllerHooks:
             self._handle_error(exc, event)
         return event
 
-    def emit_error(self, exc: Exception, *, action: str, **payload: Any) -> TelemetryEvent:
+    def emit_error(
+        self, exc: Exception, *, action: str, **payload: Any
+    ) -> TelemetryEvent:
         """Forward controller failures to the error hook (if any)."""
 
         payload_dict: MutableMapping[str, Any] = dict(payload)

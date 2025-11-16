@@ -3,7 +3,6 @@
 import json
 import os
 from importlib import import_module, reload
-from pathlib import Path
 
 import pytest
 
@@ -113,7 +112,10 @@ def test_gui_theme_file_sets_payload(monkeypatch, tmp_path):
     monkeypatch.delenv("TICTACTOE_THEME_PAYLOAD", raising=False)
 
     theme_file = tmp_path / "theme.json"
-    theme_file.write_text(json.dumps({"text": {"title": "File Theme"}}), encoding="utf-8")
+    theme_file.write_text(
+        json.dumps({"text": {"title": "File Theme"}}),
+        encoding="utf-8",
+    )
 
     cli_module = _reload_cli_module()
     cli_module.main(["--ui", "gui", "--theme-file", str(theme_file)])
@@ -196,7 +198,9 @@ def test_cli_global_logging_flag(monkeypatch):
     events = []
 
     def fake_logging_hooks():
-        return ControllerHooks(view=lambda event: events.append((event.channel, event.action)))
+        return ControllerHooks(
+            view=lambda event: events.append((event.channel, event.action))
+        )
 
     monkeypatch.setattr(cli_main, "logging_hooks", fake_logging_hooks)
     monkeypatch.setenv("TICTACTOE_LOGGING", "1")
@@ -254,7 +258,9 @@ def test_service_global_logging_flag(monkeypatch):
     events = []
 
     def fake_logging_hooks():
-        return ControllerHooks(view=lambda event: events.append((event.channel, event.action)))
+        return ControllerHooks(
+            view=lambda event: events.append((event.channel, event.action))
+        )
 
     monkeypatch.setattr(service_main, "logging_hooks", fake_logging_hooks)
     monkeypatch.setenv("TICTACTOE_LOGGING", "yes")

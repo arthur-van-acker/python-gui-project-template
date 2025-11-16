@@ -22,7 +22,9 @@ _ENV_QUIET = "TICTACTOE_AUTOMATION_QUIET"
 _SERVICE_TELEMETRY_ENV_VAR = "TICTACTOE_SERVICE_LOGGING"
 
 
-def _service_controller_hooks(flag: str = _SERVICE_TELEMETRY_ENV_VAR) -> ControllerHooks | None:
+def _service_controller_hooks(
+    flag: str = _SERVICE_TELEMETRY_ENV_VAR,
+) -> ControllerHooks | None:
     return logging_hooks() if telemetry_logging_requested(flag) else None
 
 
@@ -48,7 +50,9 @@ def _build_parser() -> argparse.ArgumentParser:
             "as the CLI frontend."
         )
     )
-    parser.add_argument("--script", help="Override the script provided via environment variables.")
+    parser.add_argument(
+        "--script", help="Override the script provided via environment variables."
+    )
     parser.add_argument(
         "--script-file",
         type=Path,
@@ -61,7 +65,10 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--label",
-        help="Label stored in the AutomationSummary. Defaults to the env var or 'service-run'.",
+        help=(
+            "Label stored in the AutomationSummary. Defaults to the env var or "
+            "'service-run'."
+        ),
     )
     parser.add_argument(
         "--quiet",

@@ -12,7 +12,12 @@ os.environ.setdefault("TICTACTOE_HEADLESS", "1")
 
 from tictactoe.config import WindowConfig
 from tictactoe.controller import ControllerHooks
-from tictactoe.domain.logic import GameState, TicTacToe
+from tictactoe.domain.logic import (
+    ExampleActor,
+    ExampleState,
+    GameState,
+    TicTacToe,
+)
 from tictactoe.ui.gui.headless_view import HeadlessGameView
 from tictactoe.ui.gui.main import TicTacToeGUI
 
@@ -48,20 +53,27 @@ def test_gui_initializes_widgets():
     app = _create_app_or_skip()
     try:
         assert app.view.cell_count() == 9
-        assert "Player X" in app.view.status_text()
+        assert app.view.status_text() == "Player ?'s turn"
         assert app.view.reset_button_label() == "New Game"
     finally:
         app.root.destroy()
 
 
 @pytest.mark.gui
-def test_gui_click_updates_button_and_status():
-    app = _create_app_or_skip()
+def test_gui_click_surfaces_domain_errors():
+    errors = []
+
+    def capture_error(exc, event):
+        errors.append((exc, event))
+
+    hooks = ControllerHooks(error=capture_error)
+    app = _create_app_or_skip(controller_hooks=hooks)
     try:
-        app._on_cell_click(0)
-        assert app.view.cell_text(0) == "X"
-        assert app.view.cell_state(0) == "disabled"
-        assert "Player O" in app.view.status_text()
+        with pytest.raises(NotImplementedError):
+            app._on_cell_click(0)
+        assert any(isinstance(exc, NotImplementedError) for exc, _ in errors)
+        assert app.view.cell_text(0) == ""
+        assert app.view.cell_state(0) == "normal"
     finally:
         app.root.destroy()
 
@@ -70,27 +82,38 @@ def test_gui_click_updates_button_and_status():
 def test_gui_reset_game_restores_state():
     app = _create_app_or_skip()
     try:
-        app._on_cell_click(0)
-        app._on_cell_click(3)
+        snapshot = ExampleState(
+            board=(ExampleActor.PRIMARY,) + (None,) * 8,
+            current_player=ExampleActor.SECONDARY,
+            state=GameState.PLAYING,
+            winner=None,
+        )
+        app._on_game_updated(snapshot)
+        assert app.view.cell_text(0) == ExampleActor.PRIMARY.value
+        assert app.view.cell_state(0) == "disabled"
+
         app._reset_game()
 
         for index in range(app.view.cell_count()):
             assert app.view.cell_text(index) == ""
             assert app.view.cell_state(index) == "normal"
         assert app.game.state == GameState.PLAYING
-        assert "Player X" in app.view.status_text()
+        assert app.view.status_text() == "Player ?'s turn"
     finally:
         app.root.destroy()
 
 
 @pytest.mark.gui
-def test_gui_win_updates_status_message():
+def test_gui_renders_win_snapshots():
     app = _create_app_or_skip()
     try:
-        for move in (0, 3, 1, 4, 2):
-            app._on_cell_click(move)
-
-        assert app.game.state == GameState.X_WON
+        snapshot = ExampleState(
+            board=(ExampleActor.PRIMARY,) * 9,
+            current_player=None,
+            state=GameState.X_WON,
+            winner=ExampleActor.PRIMARY,
+        )
+        app._on_game_updated(snapshot)
         assert "wins" in app.view.status_text()
     finally:
         app.root.destroy()

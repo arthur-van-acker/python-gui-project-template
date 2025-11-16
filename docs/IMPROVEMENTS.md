@@ -5,6 +5,7 @@ Keep the repository focused on being a reusable CustomTkinter starter kit instea
 ## 1. Replace the Placeholder Domain Layer
 - Swap the Tic Tac Toe logic in `src/tictactoe/domain/logic.py` and `tests/test_logic.py` for a neutral "ExampleState/ExampleAction" API that documents how adopters plug in their own business rules.
 - Keep the existing view/controller contracts, but mark required override points with TODOs and ensure placeholder tests fail until custom rules exist so new projects know what to implement first.
+- ✅ Implemented: `ExampleState`, `ExampleAction`, and `ExampleActor` now power the domain placeholder while `tests/test_logic.py` verifies the snapshot contract and documents that `dispatch_action` raises `NotImplementedError` until adopters supply real rules.
 
 ## 2. Offer Multiple Frontend Entry Points
 - Extend `src/tictactoe/__main__.py` to include more than the GUI launcher: add a CLI automation mode (`src/tictactoe/ui/cli/main.py`) and a headless/service entry point that showcases scripting or batch workflows.

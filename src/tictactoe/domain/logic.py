@@ -1,19 +1,25 @@
-"""Game logic for Tic Tac Toe."""
+"""Neutral domain placeholders for the CustomTkinter starter kit."""
+
+from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable, Optional, Tuple
+from typing import Any, Callable, Mapping, Optional, Tuple
 
 
-class Player(Enum):
-    """Represents a player in the game."""
+class ExampleActor(Enum):
+    """Placeholder actors shown in the sample UI until replaced."""
 
-    X = "X"
-    O = "O"  # noqa: E741 - keep single-letter enum for board notation
+    PRIMARY = "Actor A"
+    SECONDARY = "Actor B"
+
+
+# Backwards compatibility for older imports that still expect `Player`.
+Player = ExampleActor
 
 
 class GameState(Enum):
-    """Represents the current state of the game."""
+    """High-level lifecycle markers rendered by the default UI."""
 
     PLAYING = "playing"
     X_WON = "x_won"
@@ -21,36 +27,57 @@ class GameState(Enum):
     DRAW = "draw"
 
 
-BoardTuple = Tuple[Optional["Player"], ...]
+BoardTuple = Tuple[Optional[Player], ...]
 
 
 @dataclass(frozen=True)
-class GameSnapshot:
-    """Immutable view of the current game state."""
+class ExampleAction:
+    """Describes a unit of work the adopter can route into the domain layer."""
+
+    name: str
+    payload: Mapping[str, Any] | None = None
+
+
+@dataclass(frozen=True)
+class ExampleState:
+    """Immutable snapshot passed to views, tests, and automation hooks."""
 
     board: BoardTuple
-    current_player: "Player"
-    state: "GameState"
-    winner: Optional["Player"]
+    current_player: Optional[Player]
+    state: GameState
+    winner: Optional[Player]
+    notes: tuple[str, ...] = ()
+
+
+# Alias retained so the existing view/controller contracts remain unchanged.
+GameSnapshot = ExampleState
+
+
+PLACEHOLDER_NOTES: tuple[str, ...] = (
+    "TODO: Replace ExampleState with your domain-specific data.",
+    "TODO: Implement TicTacToe.dispatch_action to mutate that state.",
+)
 
 
 class TicTacToe:
-    """Main game logic for Tic Tac Toe."""
+    """Template-friendly shell that adopters replace with real business rules."""
 
-    def __init__(self):
-        """Initialize a new game."""
-        self._listeners: list[Callable[[GameSnapshot], None]] = []
-        self._board: list[Optional[Player]] = [None for _ in range(9)]
-        self.current_player: Player = Player.X
+    def __init__(self, board_size: int = 9):
+        self._listeners: list[Callable[[ExampleState], None]] = []
+        self._board_size = board_size
+        self._board: list[Optional[Player]] = [None for _ in range(board_size)]
+        self.current_player: Optional[Player] = None
         self.state: GameState = GameState.PLAYING
+        self._winner: Optional[Player] = None
+        self._notes: tuple[str, ...] = PLACEHOLDER_NOTES
         self.reset()
 
-    def add_listener(self, listener: Callable[[GameSnapshot], None]) -> None:
-        """Register a callback to be invoked whenever the game state changes."""
+    def add_listener(self, listener: Callable[[ExampleState], None]) -> None:
+        """Register a callback triggered whenever `ExampleState` changes."""
 
         self._listeners.append(listener)
 
-    def remove_listener(self, listener: Callable[[GameSnapshot], None]) -> None:
+    def remove_listener(self, listener: Callable[[ExampleState], None]) -> None:
         """Remove a previously registered listener."""
 
         if listener in self._listeners:
@@ -58,113 +85,59 @@ class TicTacToe:
 
     @property
     def board(self) -> BoardTuple:
-        """Return an immutable view of the board."""
+        """Expose an immutable view of the board placeholders."""
 
         return tuple(self._board)
 
     @property
-    def snapshot(self) -> GameSnapshot:
-        """Return a snapshot that summarizes the current game state."""
+    def snapshot(self) -> ExampleState:
+        """Summarize the state that will eventually drive the UI."""
 
-        return GameSnapshot(
+        return ExampleState(
             board=self.board,
             current_player=self.current_player,
             state=self.state,
-            winner=self.get_winner(),
+            winner=self._winner,
+            notes=self._notes,
+        )
+
+    def dispatch_action(self, action: ExampleAction) -> ExampleState:
+        """Entry point adopters override with their business rules.
+
+        Replace this method with real state transitions, then update the
+        placeholder tests to assert your expected behavior.
+        """
+
+        raise NotImplementedError(
+            "TODO: Wire dispatch_action to your application's domain logic."
         )
 
     def make_move(self, position: int) -> bool:
-        """
-        Make a move at the specified position.
+        """Legacy controller hook kept for backwards compatibility."""
 
-        Args:
-            position: Board position (0-8)
-
-        Returns:
-            True if move was successful, False otherwise
-        """
-        if self.state != GameState.PLAYING:
-            return False
-
-        if position < 0 or position > 8:
-            return False
-
-        if self._board[position] is not None:
-            return False
-
-        self._board[position] = self.current_player
-        self._check_game_state()
-
-        if self.state == GameState.PLAYING:
-            self.current_player = (
-                Player.O if self.current_player == Player.X else Player.X
-            )
-
-        self._notify_listeners()
-
-        return True
-
-    def _check_game_state(self) -> None:
-        """Check if the game has been won or drawn."""
-        # Check rows
-        for i in range(0, 9, 3):
-            if (
-                self._board[i] is not None
-                and self._board[i] == self._board[i + 1] == self._board[i + 2]
-            ):
-                self.state = (
-                    GameState.X_WON if self._board[i] == Player.X else GameState.O_WON
-                )
-                return
-
-        # Check columns
-        for i in range(3):
-            if (
-                self._board[i] is not None
-                and self._board[i] == self._board[i + 3] == self._board[i + 6]
-            ):
-                self.state = (
-                    GameState.X_WON if self._board[i] == Player.X else GameState.O_WON
-                )
-                return
-
-        # Check diagonals
-        if (
-            self._board[0] is not None
-            and self._board[0] == self._board[4] == self._board[8]
-        ):
-            self.state = (
-                GameState.X_WON if self._board[0] == Player.X else GameState.O_WON
-            )
-            return
-
-        if (
-            self._board[2] is not None
-            and self._board[2] == self._board[4] == self._board[6]
-        ):
-            self.state = (
-                GameState.X_WON if self._board[2] == Player.X else GameState.O_WON
-            )
-            return
-
-        # Check for draw
-        if all(cell is not None for cell in self._board):
-            self.state = GameState.DRAW
+        action = ExampleAction(
+            name="grid.select",
+            payload={
+                "position": position,
+                "actor": self.current_player.value if self.current_player else None,
+            },
+        )
+        self.dispatch_action(action)
+        return False
 
     def reset(self) -> None:
-        """Reset the game to initial state."""
-        self._board = [None for _ in range(9)]
-        self.current_player = Player.X
+        """Return to the neutral placeholder state and notify observers."""
+
+        self._board = [None for _ in range(self._board_size)]
+        self.current_player = None
         self.state = GameState.PLAYING
+        self._winner = None
         self._notify_listeners()
 
     def get_winner(self) -> Optional[Player]:
-        """Get the winning player if any."""
-        if self.state == GameState.X_WON:
-            return Player.X
-        elif self.state == GameState.O_WON:
-            return Player.O
-        return None
+        """Expose the winning token once custom rules set it."""
+
+        return self._winner
 
     def _notify_listeners(self) -> None:
         """Notify all registered listeners of the latest snapshot."""

@@ -8,6 +8,8 @@ This guide walks you through installing the published YourApp Starter bundle so 
 - **Python:** Version 3.8 or later available on `PATH` (the installer bootstraps its own virtual environment using whichever `python` it finds)
 - **Internet Connection:** Required the first time the installer downloads dependencies from PyPI
 
+> This installer is Windows-only by design—the batch/VBScript pair depends on Explorer, PowerShell, and the Windows desktop shell. For macOS/Linux evaluations, install the package via `pip install -r requirements.txt` and launch `python -m tictactoe` directly.
+
 > The installer creates an isolated `.venv` inside the install directory so nothing leaks into your global Python environment.
 
 ## Installation Steps
@@ -26,6 +28,16 @@ This guide walks you through installing the published YourApp Starter bundle so 
 1. Open the extracted folder
 2. Double-click **`installation.bat`**
 3. If Windows SmartScreen appears, choose **More info → Run anyway** (the script is unsigned by design so adopters can add their own signing step)
+
+Expected console log excerpt:
+```
+Creating %LOCALAPPDATA%\Programs\yourapp-starter-<version>
+Bootstrapping virtual environment (.venv)
+Installing wheel tictactoe-<version>-py3-none-any.whl
+Running smoke test: python -m tictactoe --ui service --script 0,4,8 --quiet --label installer-smoke
+Desktop shortcut created: YourApp Starter.lnk
+Installation complete! Shortcut created.
+```
 
 ### Step 4: What the Installer Does
 
@@ -88,6 +100,12 @@ Set these variables before launching if you prefer zero-touch automation (PowerS
 | `TICTACTOE_LOGGING` | Enables shared telemetry hooks for **all** frontends via `ControllerHooks.logging_hooks()`. | `$env:TICTACTOE_LOGGING = "1"`
 
 Close the terminal (or `Remove-Item Env:VARIABLE`) to restore defaults.
+
+```bash
+export TICTACTOE_UI=cli
+python -m tictactoe
+unset TICTACTOE_UI
+```
 
 > **Tip:** Per-frontend aliases such as `TICTACTOE_GUI_LOGGING`, `TICTACTOE_CLI_LOGGING`, and `TICTACTOE_SERVICE_LOGGING` still work if you only want diagnostics for a single surface.
 

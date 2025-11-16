@@ -23,6 +23,14 @@ This document walks you through adopting the YourApp Starter template for your o
 2. **Create a virtual environment** (`python -m venv .venv`) and activate it.
 3. **Install the package in editable mode** (`pip install -e .`) plus dev tools (`pip install -r requirements.txt`).
 
+macOS/Linux equivalents:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python -m tictactoe --list-frontends
+```
+
 > **Why this flow?** The editable install mirrors how end users will consume the wheel while still giving you hot-reload style development inside `src/`. A dedicated virtual environment keeps global Python installations clean and matches the installer’s behavior.
 
 ---
@@ -32,6 +40,16 @@ This document walks you through adopting the YourApp Starter template for your o
 1. Update `pyproject.toml` metadata (`[project] name`, `description`, version, authors).
 2. Rename the package directory under `src/` (e.g., `tictactoe` → `myapp`).
 3. Adjust import paths, entry points in `src/<your-package>/__main__.py`, and `tictactoe.egg-info` (regenerated automatically on the next build).
+
+Helper commands (PowerShell example—adapt to bash as needed):
+```pwsh
+Rename-Item src/tictactoe src/myapp
+Get-ChildItem -Recurse -Filter *.py | ForEach-Object {
+   (Get-Content $_.FullName) -replace "tictactoe","myapp" | Set-Content $_.FullName
+}
+python -m pytest -m "not gui"
+```
+Seeing pytest succeed immediately after the rename confirms you didn’t strand any imports before committing.
 
 > **Why these files?** `pyproject.toml` drives packaging metadata, installers, and shortcuts. Renaming the src directory keeps the module namespace aligned. Entry points are how users launch the app; changing them early prevents stray `tictactoe` references later.
 
@@ -61,6 +79,18 @@ The template follows an MVC-inspired split:
 **How to adapt it:**
 1. Register new frontends in `tictactoe.__main__.py` by extending the `FRONTENDS` map.
 2. Honor `TICTACTOE_UI` / `TICTACTOE_HEADLESS` equivalents in your code if you rename the package (these env vars are read before CLI args to support silent installers and CI).
+
+Setter/cleanup quick ref:
+```pwsh
+$env:TICTACTOE_UI = "cli"
+python -m tictactoe
+Remove-Item Env:TICTACTOE_UI
+```
+```bash
+export TICTACTOE_HEADLESS=1
+python -m tictactoe --ui gui
+unset TICTACTOE_HEADLESS
+```
 
 > **Why this design?** Installers and automated tests can switch interfaces without copying multiple entry scripts. It also demonstrates how to offer both GUI and CLI experiences from a single distribution.
 
@@ -95,6 +125,8 @@ The template follows an MVC-inspired split:
    - `tic-tac-toe-starter.vbs` (runs without console)
    - Packaged assets/icon
 3. Test the installer on a clean user account if possible.
+
+`wheel-builder.bat --ci --no-pause` mirrors the GitHub Actions workflow (installs into `%TEMP%` and never prompts). The default invocation installs under `%LOCALAPPDATA%` and pauses before exit. Both require Windows with the desktop shell available; run the command from `pwsh` so quoting matches the script’s expectations.
 
 > **Why batch + VBScript?** The batch file handles environment creation, wheel installation, and shortcuts. The VBScript launcher hides the console, giving a native desktop feel. Both scripts demonstrate Windows-friendly distribution without MSI complexity.
 

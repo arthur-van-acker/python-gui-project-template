@@ -57,6 +57,16 @@ $env:TICTACTOE_HEADLESS = "1"   # PowerShell
 $env:TICTACTOE_UI = "cli"       # Force the terminal client for scripted checks
 ```
 
+Reset those overrides when you finish:
+```pwsh
+Remove-Item Env:TICTACTOE_HEADLESS, Env:TICTACTOE_UI -ErrorAction SilentlyContinue
+```
+```bash
+unset TICTACTOE_HEADLESS TICTACTOE_UI
+```
+
+If you prefer running GUI tests with a real Tk backend, install the official Python build on Windows (it bundles Tk) or add the system package on macOS/Linux (`brew install python-tk`, `sudo apt install python3-tk`, etc.). Otherwise, keep headless mode enabled so tests stay portable.
+
 4. Verify tooling versions:
 
 ```pwsh
@@ -75,6 +85,12 @@ python -m pytest
 ```
 
 Add `--cov=tictactoe --cov-report=term-missing` if you also want coverage numbers during the run.
+
+Typical green run output:
+```
+==================== 120 passed, 4 skipped in 12.34s ====================
+```
+Seeing a similar footer locally means CI will accept your branch once you push.
 
 ### 5.2 Filter by Marker
 

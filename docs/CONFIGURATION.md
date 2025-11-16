@@ -128,6 +128,24 @@ config = deserialize_game_view_config(theme_dict)
 
 When the GUI (or headless GUI) launches, it inspects `TICTACTOE_THEME_PAYLOAD` and rebuilds the dataclasses via `deserialize_game_view_config`. This keeps installers and CI jobs theme-aware without touching widget code.
 
+### Hands-on Theme Edit (5-minute loop)
+1. Copy one of the shipped themes:
+    ```bash
+    cp src/tictactoe/assets/themes/dark.json tmp-theme.json
+    ```
+2. Edit colors, fonts, or copy inside `tmp-theme.json` (VS Code keeps JSON validation on).
+3. Validate live in the app:
+    ```bash
+    python -m tictactoe --theme-file tmp-theme.json
+    ```
+    If the GUI starts without stack traces, the JSON matches the schema. Errors pinpoint the first mismatched field.
+4. Promote the JSON to typed Python code:
+    ```bash
+    python -m tictactoe.tools.theme_codegen tmp-theme.json --variable-prefix demo
+    ```
+    The command prints a `demo_theme` dataclass assignment you can paste into `config/gui.py` or tests.
+5. Commit both the JSON (if you plan to ship it) and the generated Python so future contributors can tweak either side.
+
 ## Sample JSON Themes & Dataclass Converter
 
 Need a starting point for custom palettes? The repository now ships JSON payloads under `src/tictactoe/assets/themes/` (`light.json`, `dark.json`, `enterprise.json`). Feed those files into the new converter CLI to emit ready-to-paste `GameViewConfig` assignments:

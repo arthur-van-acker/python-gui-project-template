@@ -51,6 +51,8 @@ jobs:
 
 > The repository’s checked-in `.github/workflows/ci.yml` currently mirrors the `run-ci` scripts by running the linters/type checker/pytest directly instead of invoking tox. Use whichever style matches your team’s conventions.
 
+Need to tweak the workflow? Open `.github/workflows/ci.yml` at the repo root—no scaffolding tools required. To re-run it manually, visit GitHub → **Actions** → select the `CI` workflow → **Run workflow**, then pick the target branch. Capture a screenshot or permalink of the passing run whenever you document release steps so teammates can see the expected job order.
+
 ## Extending to Release Pipelines
 - Add a `release` job that depends on `tests`, runs `wheel-builder.bat` (or PowerShell equivalent on Windows runners), and uploads `dist/` as an artifact.
 - Gate GitHub Releases on successful CI by requiring the workflow status check.

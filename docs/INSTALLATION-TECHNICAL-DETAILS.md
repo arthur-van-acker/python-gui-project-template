@@ -9,8 +9,8 @@ This document provides a comprehensive technical breakdown of the installation p
 ### 1. **Batch File Initialization**
    - `installation.bat` starts executing
    - `setlocal enabledelayedexpansion` - Enables variable expansion within loops/blocks
-   - Sets `INSTALL_DIR` variable to `%LOCALAPPDATA%\Programs\ttt.v0.1.0`
-   - This expands to: `C:\Users\[Username]\AppData\Local\Programs\ttt.v0.1.0`
+  - Sets `INSTALL_DIR` variable to `%LOCALAPPDATA%\Programs\yourapp-starter-<version>` (for example `yourapp-starter-0.1.0`)
+  - In CI mode (`wheel-builder.bat --ci`) this instead points to `%TEMP%\yourapp-starter-<version>` so test runs never touch the real Programs folder
 
 ### 2. **Check for Existing Installation**
    - Checks if `%INSTALL_DIR%` folder exists
@@ -28,7 +28,7 @@ This document provides a comprehensive technical breakdown of the installation p
 
 ### 3. **Create Installation Directory**
    - Executes `mkdir "%INSTALL_DIR%"` to create fresh installation folder
-   - Creates: `C:\Users\[Username]\AppData\Local\Programs\ttt.v0.1.0\`
+  - Creates: `C:\Users\[Username]\AppData\Local\Programs\yourapp-starter-0.1.0\`
 
 ### 4. **Copy Distribution Files**
    - Executes `xcopy /Y /Q "%~dp0*.*" "%INSTALL_DIR%\"`
@@ -36,9 +36,11 @@ This document provides a comprehensive technical breakdown of the installation p
      - `/Y` = overwrite without prompting
      - `/Q` = quiet mode (doesn't display filenames)
    - **Files copied:**
-     - `tictactoe-0.1.0-py3-none-any.whl`
+     - `tictactoe-<version>-py3-none-any.whl`
      - `installation.bat` (itself)
      - `tic-tac-toe-starter.vbs`
+     - `how-to-install-me.txt`, `license.txt`, and future helper docs
+     - `assets\` directory (icons, theme payloads)
      - `favicon.ico`
 
 ### 5. **Create Virtual Environment**
@@ -70,7 +72,7 @@ This document provides a comprehensive technical breakdown of the installation p
      - Now when you run `python` or `pip`, it uses the venv versions
 
 ### 7. **Install Package with pip**
-   - Executes `pip install "%INSTALL_DIR%\tictactoe-0.1.0-py3-none-any.whl"`
+  - Executes `pip install "%INSTALL_DIR%\tictactoe-<version>-py3-none-any.whl"`
    - pip (from the virtual environment) processes the wheel file:
      
      **a. Read wheel metadata:**
@@ -97,9 +99,9 @@ This document provides a comprehensive technical breakdown of the installation p
        - `.venv\Lib\site-packages\customtkinter\`
      - Writes `.dist-info` folders for each package (metadata)
      
-     **d. Install main package:**
-     - Extracts `tictactoe-0.1.0-py3-none-any.whl`
-     - Creates `.venv\Lib\site-packages\tictactoe\` folder
+    **d. Install main package:**
+    - Extracts `tictactoe-<version>-py3-none-any.whl`
+    - Creates `.venv\Lib\site-packages\tictactoe\` folder
      - **Copies package contents:**
        - `__init__.py`
        - `__main__.py`
@@ -107,12 +109,17 @@ This document provides a comprehensive technical breakdown of the installation p
        - `config\` folder with files
        - `domain\` folder with files
        - `ui\` folder with subfolders and files
-     - Creates `.venv\Lib\site-packages\tictactoe-0.1.0.dist-info\`
+    - Creates `.venv\Lib\site-packages\tictactoe-<version>.dist-info\`
      
      **e. Install entry point script:**
      - Reads `[project.scripts]` from package metadata
      - Creates `.venv\Scripts\tictactoe.exe`
      - This is a wrapper that executes `python -m tictactoe.__main__:main`
+
+   - **Post-install smoke test:**
+     - Executes `call "%INSTALL_DIR%\.venv\Scripts\python.exe" -m tictactoe --ui service --script 0,4,8 --quiet --label installer-smoke`
+     - Verifies the automation/service frontend boots correctly using the freshly installed wheel
+     - Any non-zero exit code aborts the installer before shortcuts or manifests are written
    
    - **If installation fails:**
      - Displays error message
@@ -139,18 +146,18 @@ This document provides a comprehensive technical breakdown of the installation p
 
 ### 10. **Set Path Variables**
    - Sets `SCRIPT_DIR=%INSTALL_DIR%\` 
-     - Example: `C:\Users\Arthur\AppData\Local\Programs\ttt.v0.1.0\`
+     - Example: `C:\Users\Arthur\AppData\Local\Programs\yourapp-starter-0.1.0\`
    - Sets `ICON_PATH=%SCRIPT_DIR%favicon.ico`
      - Full path to icon file
    - Sets `VBS_PATH=%SCRIPT_DIR%tic-tac-toe-starter.vbs`
      - Full path to VBS launcher
 
 ### 11. **Create VBScript for Shortcut**
-   - Creates temporary VBScript file at `%TEMP%\create_ttt_shortcut.vbs`
+  - Creates temporary VBScript file at `%TEMP%\create_yourapp_shortcut.vbs`
    - **VBScript contents (7 lines):**
      ```vbscript
      Set oWS = WScript.CreateObject("WScript.Shell")
-     sLinkFile = "[Desktop Path]\Tic Tac Toe.lnk"
+    sLinkFile = "[Desktop Path]\YourApp Starter.lnk"
      Set oLink = oWS.CreateShortcut(sLinkFile)
      oLink.TargetPath = "[VBS_PATH]"
      oLink.IconLocation = "[ICON_PATH]"
@@ -160,23 +167,28 @@ This document provides a comprehensive technical breakdown of the installation p
    - Each line is written using `echo` with output redirection (`>` and `>>`)
 
 ### 12. **Execute VBScript**
-   - Runs `cscript //nologo "%TEMP%\create_ttt_shortcut.vbs"`
+  - Runs `cscript //nologo "%TEMP%\create_yourapp_shortcut.vbs"`
    - `//nologo` suppresses the cscript banner
    - **VBScript execution:**
      - Creates Windows Script Host shell object
-     - Creates shortcut object for `Desktop\Tic Tac Toe.lnk`
+     - Creates shortcut object for `Desktop\YourApp Starter.lnk`
      - Sets shortcut properties:
-       - **Target:** `C:\Users\...\ttt.v0.1.0\tic-tac-toe-starter.vbs`
-       - **Icon:** `C:\Users\...\ttt.v0.1.0\favicon.ico`
-       - **Working Directory:** `C:\Users\...\ttt.v0.1.0\`
+      - **Target:** `C:\Users\...\yourapp-starter-0.1.0\tic-tac-toe-starter.vbs`
+      - **Icon:** `C:\Users\...\yourapp-starter-0.1.0\favicon.ico`
+      - **Working Directory:** `C:\Users\...\yourapp-starter-0.1.0\`
      - Saves the `.lnk` file to desktop
    - **Result:** Desktop shortcut appears with game icon
 
-### 13. **Cleanup Temporary Files**
-   - Executes `del "%TEMP%\create_ttt_shortcut.vbs"`
+### 13. **Write Installation Manifest**
+  - Executes `powershell -NoProfile` to emit `install-info.json` beside the application files
+  - Captures `ProductName`, `Version`, `InstallDir`, and wheel filename for auditing or telemetry scripts
+  - File is UTF-8 encoded JSON to simplify downstream tooling
+
+### 14. **Cleanup Temporary Files**
+  - Executes `del "%TEMP%\create_yourapp_shortcut.vbs"`
    - Removes the temporary VBScript file
 
-### 14. **Display Completion**
+### 15. **Display Completion**
    - Shows messages:
      - "Installation complete!"
      - "Desktop shortcut created successfully."
@@ -191,7 +203,7 @@ This document provides a comprehensive technical breakdown of the installation p
 After installation completes, the directory structure is:
 
 ```
-C:\Users\[Username]\AppData\Local\Programs\ttt.v0.1.0\
+C:\Users\[Username]\AppData\Local\Programs\yourapp-starter-0.1.0\
 ├── .venv\
 │   ├── Scripts\
 │   │   ├── python.exe
@@ -219,7 +231,7 @@ C:\Users\[Username]\AppData\Local\Programs\ttt.v0.1.0\
 └── favicon.ico
 
 Desktop:
-└── Tic Tac Toe.lnk (shortcut)
+└── YourApp Starter.lnk (shortcut)
 ```
 
 ---
@@ -229,19 +241,19 @@ Desktop:
 When the user launches the game via the desktop shortcut:
 
 ### 1. **User Interaction**
-   - User double-clicks `Tic Tac Toe.lnk` on desktop
+  - User double-clicks `YourApp Starter.lnk` on desktop
 
 ### 2. **Windows Shortcut Resolution**
    - Windows reads the `.lnk` file
-   - Resolves target: `C:\Users\...\ttt.v0.1.0\tic-tac-toe-starter.vbs`
-   - Sets working directory: `C:\Users\...\ttt.v0.1.0\`
+  - Resolves target: `C:\Users\...\yourapp-starter-0.1.0\tic-tac-toe-starter.vbs`
+  - Sets working directory: `C:\Users\...\yourapp-starter-0.1.0\`
 
 ### 3. **VBScript Execution**
    - Windows launches `wscript.exe` to execute the VBS file
    - VBScript reads and executes:
      ```vbscript
      Set WshShell = CreateObject("WScript.Shell")
-     WshShell.Run """C:\Users\...\ttt.v0.1.0\.venv\Scripts\pythonw.exe"" -m tictactoe", 0
+    WshShell.Run """C:\Users\...\yourapp-starter-0.1.0\.venv\Scripts\pythonw.exe"" -m tictactoe", 0
      Set WshShell = Nothing
      ```
    - The `0` parameter means: run hidden (no console window)

@@ -20,6 +20,7 @@ Keep the repository focused on being a reusable CustomTkinter starter kit instea
 ## 4. Make Distribution & CI Match Real Products
 - Update `wheel-builder.bat`, `installation.bat`, and `tic-tac-toe-starter.vbs` to demonstrate version stamping, custom shortcut names, asset copying, and a smoke-test hook executed after install.
 - Mirror those steps inside `scripts/run-ci.ps1` (and `.sh`) so the template shows how to run linting, type-checking, pytest (GUI + non-GUI markers), and installer verification in a single command.
+- ✅ Implemented: `wheel-builder.bat` now reads the project version, copies `assets/`, emits helper docs, and writes an `installation.bat` that installs into a stamped path, copies assets, creates shortcuts, and runs a `--ui service` smoke script before writing `install-info.json`. The PowerShell and Bash CI scripts install deps, run black/ruff/mypy plus both pytest marker sets, then perform installer verification (Windows invokes `wheel-builder.bat --ci`/`installation.bat`, POSIX shells build the wheel and exercise it inside a throwaway virtualenv sandbox).
 
 ## 5. Rewrite Docs for Template Users
 - Refresh `README.md`, `docs/TEMPLATE-USAGE-GUIDE.md`, and `docs/TEMPLATE-CHECKLIST.md` to speak about "YourApp Starter" instead of Tic Tac Toe, explicitly calling out the rename steps, config knobs, and required tests.

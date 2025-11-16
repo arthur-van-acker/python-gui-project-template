@@ -223,15 +223,21 @@ without rewriting `TicTacToeGUI`. The same telemetry helpers (`cell_text`,
 #### Build Distribution
 
 ```bash
-# Run the build script
+# Build the interactive bundle (prompts if anything fails)
 .\wheel-builder.bat
 
-# Output will be in dist/ folder:
-# - tictactoe-0.1.0-py3-none-any.whl
-# - installation.bat
-# - tic-tac-toe-starter.vbs
-# - favicon.ico
+# Build + smoke-test into %%TEMP%% (useful for CI)
+.\wheel-builder.bat --ci --no-pause
 ```
+
+The script stamps the current version, copies `src/tictactoe/assets/`, and
+emits a complete installer payload in `dist/`:
+
+- `tictactoe-<version>-py3-none-any.whl`
+- `installation.bat` (pre-configured install root + smoke tests)
+- `tic-tac-toe-starter.vbs` launcher with relative paths
+- `how-to-install-me.txt` and `license.txt`
+- `assets/` directory (icons, future resources)
 
 ---
 
@@ -241,26 +247,22 @@ without rewriting `TicTacToeGUI`. The same telemetry helpers (`cell_text`,
 
 This project includes an automated build system:
 
-1. **Run** `wheel-builder.bat`
-2. **Outputs** to `dist/` folder:
-   - Python wheel package
-   - Windows installer script
-   - VBScript launcher (for silent execution)
-   - Application icon
+1. **Run** `wheel-builder.bat` (or `wheel-builder.bat --ci --no-pause` inside pipelines)
+2. **Outputs** the wheel, installer script, launcher, and docs/asset bundle under `dist/`
 
 ### Installation System
 
-The installer (`installation.bat`) performs:
+The installer (`installation.bat`) now mirrors production-ready workflows:
 
-1. ✅ Removes old version (if exists)
-2. ✅ Creates installation directory
-3. ✅ Copies distribution files
-4. ✅ Creates isolated virtual environment
-5. ✅ Installs package and dependencies
-6. ✅ Creates desktop shortcut with icon
-7. ✅ Configures taskbar integration
+1. ✅ Version-stamped install directory (`%LOCALAPPDATA%\Programs\yourapp-starter-<version>%` by default, `%TEMP%` when built with `--ci`)
+2. ✅ Full bundle copy including `assets/` so icons/config ship with the app
+3. ✅ Private virtual environment creation + wheel installation
+4. ✅ Post-install smoke test (`python -m tictactoe --ui service --script 0,4,8 --quiet`)
+5. ✅ Desktop shortcut + VBScript launcher with custom icon name (`YourApp Starter.lnk`)
+6. ✅ `install-info.json` manifest for inventory/telemetry scripts
+7. ✅ `how-to-install-me.txt` aid packaged beside the installer for hand-off documentation
 
-**Installation Path**: `%LOCALAPPDATA%\Programs\ttt.v0.1.0`
+To uninstall, delete the stamped install directory and remove the shortcut.
 
 For technical details, see [INSTALLATION-TECHNICAL-DETAILS.md](docs/INSTALLATION-TECHNICAL-DETAILS.md).
 
@@ -394,9 +396,10 @@ python -m mypy src
 python -m tox -e lint,type,py313
 
 # One-command local CI rehearsal (PowerShell)
+#   -> runs black/ruff/mypy, pytest markers, wheel-builder, installation.bat
 pwsh scripts/run-ci.ps1
 
-# Bash/zsh equivalent
+# Bash/zsh equivalent (uses a temporary virtualenv sandbox for installer verification)
 bash scripts/run-ci.sh
 ```
 

@@ -1,6 +1,6 @@
 # YourApp Starter – Python GUI Template
 
-YourApp Starter is a CustomTkinter-based reference implementation that shows how to ship a polished Python desktop app with multiple frontends, theming hooks, and production-ready installers. The repo still bundles the Tic Tac Toe sample, but every file is structured so you can drop in your own domain logic without rewriting the infrastructure.
+YourApp Starter is a CustomTkinter-based reference implementation that shows how to ship a polished Python desktop app with multiple frontends, theming hooks, and production-ready installers. The UI still resembles the original Tic Tac Toe sample, but the domain layer now ships as a neutral stub (`dispatch_action` raises `NotImplementedError`) so you can wire in your own business rules immediately.
 
 ![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-0BSD-green)
@@ -30,6 +30,7 @@ This project was created as a **reference template** for building professional P
 ### What You Can Reuse Immediately
 - **Multi-frontend dispatcher**: GUI, headless, CLI, and service entry points live behind `python -m tictactoe` so you can register more launchers without forking scripts.
 - **Typed theme/config layer**: `tictactoe.config.gui` exposes dataclasses for fonts, colors, copy, and layout; presets can be loaded from JSON or environment variables.
+- **Domain placeholder scaffolding**: `tictactoe.domain.logic` emits `ExampleState` snapshots and documents override points so adopters can replace the sample logic without guessing how the controllers interact.
 - **Installer + launcher duo**: `wheel-builder.bat` outputs a version-stamped `installation.bat`, VBScript launcher, manifest, and helper docs with one command.
 - **CI rehearsal scripts**: `scripts/run-ci.ps1` and `.sh` run formatting, linting, typing, pytest (GUI + non-GUI), and installer smoke tests locally or in automation.
 - **Headless GUI adapter**: `HeadlessGameView` mirrors widget telemetry so GUI smoke tests run in CI without a Tk display.
@@ -488,12 +489,10 @@ Potential improvements for this template:
 
 - [ ] AI opponent (single-player mode)
 - [ ] Settings/preferences system
-- [ ] Multiple themes (dark/light mode)
 - [ ] Sound effects
 - [ ] Statistics tracking
 - [ ] Linux/Mac installer support
 - [ ] PyInstaller build for standalone .exe
-- [ ] Automated testing in CI/CD
 - [ ] Internationalization (i18n)
 
 ---

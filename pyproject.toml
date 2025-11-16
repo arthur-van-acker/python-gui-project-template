@@ -56,7 +56,7 @@ Issues = "https://github.com/yourusername/tic-tac-toe/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-tictactoe = ["assets/*"]
+tictactoe = ["assets/*", "assets/**/*"]
 
 [tool.black]
 line-length = 88

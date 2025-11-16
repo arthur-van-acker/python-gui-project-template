@@ -200,6 +200,14 @@ Path("themes/dark.json").write_text(
 PY
 ```
 
+Want to flip JSON experiments back into typed dataclasses? The sample payloads live in `src/tictactoe/assets/themes/`, and you can promote any of them with:
+
+```bash
+python -m tictactoe.tools.theme_codegen src/tictactoe/assets/themes/light.json --variable-prefix marketing
+```
+
+The script prints an import block plus a `marketing_light_theme` variable so you can commit polished presets once you're happy with the JSON prototype.
+
 When you don't want to pass CLI flags, switch to the service frontend (`--ui service`) 
 and configure the environment variables above. This is handy for installer smoke
 tests or GitHub Actions jobs that already manage state through env vars.

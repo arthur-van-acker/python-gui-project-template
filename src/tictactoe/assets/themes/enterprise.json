@@ -1,0 +1,42 @@
+{
+    "text": {
+        "title": "Enterprise Suite",
+        "reset_button": "Restart Simulation",
+        "draw_message": "Scenario resolved evenly",
+        "win_message_template": "{winner} clears the review",
+        "turn_message_template": "{player} reviewing"
+    },
+    "colors": {
+        "title_text": "#0F2A43",
+        "status_text": "#1D3F66",
+        "board_background": "#D1E5FF",
+        "cell_text": "#0F2A43",
+        "cell_fg": "#FFFFFF",
+        "cell_hover": "#BCD4F6",
+        "reset_fg": "#0A84FF"
+    },
+    "fonts": {
+        "title": {
+            "size": 28,
+            "weight": "bold"
+        },
+        "status": {
+            "size": 20,
+            "weight": null
+        }
+    },
+    "layout": {
+        "title_padding": 18,
+        "status_padding": 10,
+        "board_padding": [
+            32,
+            32
+        ],
+        "cell_size": [
+            110,
+            110
+        ],
+        "cell_spacing": 8,
+        "reset_padding": 26
+    }
+}

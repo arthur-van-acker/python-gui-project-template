@@ -29,5 +29,5 @@ Keep the repository focused on being a reusable CustomTkinter starter kit instea
 
 ## 6. Optional Stretch Ideas
 - ✅ Provide a `controller/` package stub and show how to register telemetry/logging hooks in `ui/gui/main.py`. `tictactoe.controller` now ships with `ControllerHooks` plus a `logging_hooks()` helper, and every frontend honors the shared `TICTACTOE_LOGGING` flag (with legacy `*_LOGGING` env vars still supported) so teams can flip on telemetry without changing code.
-- Include sample JSON theme files plus a script that converts them into dataclasses for rapid prototyping.
+- ✅ Include sample JSON theme files (`src/tictactoe/assets/themes/*.json`) plus the `python -m tictactoe.tools.theme_codegen` helper that converts them into `GameViewConfig` dataclasses for rapid prototyping.
 - Add a GitHub Actions workflow that runs the CI script and attaches installer artifacts, illustrating how teams can publish releases automatically.

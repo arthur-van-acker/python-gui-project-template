@@ -127,3 +127,13 @@ config = deserialize_game_view_config(theme_dict)
 | `TICTACTOE_THEME_PAYLOAD` | (Advanced) Direct JSON blob consumed by the GUI; managed automatically when using the options above. |
 
 When the GUI (or headless GUI) launches, it inspects `TICTACTOE_THEME_PAYLOAD` and rebuilds the dataclasses via `deserialize_game_view_config`. This keeps installers and CI jobs theme-aware without touching widget code.
+
+## Sample JSON Themes & Dataclass Converter
+
+Need a starting point for custom palettes? The repository now ships JSON payloads under `src/tictactoe/assets/themes/` (`light.json`, `dark.json`, `enterprise.json`). Feed those files into the new converter CLI to emit ready-to-paste `GameViewConfig` assignments:
+
+```bash
+python -m tictactoe.tools.theme_codegen src/tictactoe/assets/themes/dark.json --variable-prefix brand
+```
+
+The command above prints an import block plus a variable named `brand_dark_theme` that mirrors the JSON payload. Point it at multiple files to generate a bundle of dataclasses for docs, tests, or future presets. Combine this with `serialize_game_view_config()` to roundtrip edits live in the GUI before promoting them to code.

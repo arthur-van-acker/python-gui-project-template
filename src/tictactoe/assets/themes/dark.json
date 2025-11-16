@@ -1,0 +1,42 @@
+{
+    "text": {
+        "title": "Nocturne",
+        "reset_button": "Play Again",
+        "draw_message": "It's a stalemate in the dark.",
+        "win_message_template": "{winner} claims the grid",
+        "turn_message_template": "{player} plotting"
+    },
+    "colors": {
+        "title_text": "#F4F4F9",
+        "status_text": "#C0C4CC",
+        "board_background": "#10121A",
+        "cell_text": "#F8F8FA",
+        "cell_fg": "#2B2F3A",
+        "cell_hover": "#3E4554",
+        "reset_fg": "#1F2430"
+    },
+    "fonts": {
+        "status": {
+            "size": 18,
+            "weight": null
+        },
+        "cell": {
+            "size": 34,
+            "weight": "bold"
+        }
+    },
+    "layout": {
+        "title_padding": 16,
+        "status_padding": 12,
+        "board_padding": [
+            28,
+            28
+        ],
+        "cell_size": [
+            96,
+            96
+        ],
+        "cell_spacing": 4,
+        "reset_padding": 20
+    }
+}

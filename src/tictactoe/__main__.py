@@ -48,7 +48,11 @@ FRONTENDS: MutableMapping[str, FrontendSpec] = {
     ),
     "cli": FrontendSpec(
         target="tictactoe.ui.cli.main:main",
-        description="Simple console interface",
+        description="Placeholder CLI with automation-friendly script mode",
+    ),
+    "service": FrontendSpec(
+        target="tictactoe.ui.service.main:main",
+        description="Headless automation/service runner (env driven)",
     ),
 }
 

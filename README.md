@@ -144,6 +144,9 @@ python -m tictactoe --ui headless
 # Launch the terminal client
 python -m tictactoe --ui cli
 
+# Launch the headless automation/service runner
+python -m tictactoe --ui service
+
 # List every registered frontend
 python -m tictactoe --list-frontends
 ```
@@ -152,8 +155,13 @@ Environment variables offer zero-touch overrides for installers or CI:
 
 | Variable | Accepted values | Notes |
 | --- | --- | --- |
-| `TICTACTOE_UI` | `gui`, `cli`, `headless` | Forces a frontend when no flag is provided. |
+| `TICTACTOE_UI` | `gui`, `cli`, `headless`, `service` | Forces a frontend when no flag is provided. |
 | `TICTACTOE_HEADLESS` | `0` / `1` | Still respected by the GUI to load the shim widgets in tests. |
+| `TICTACTOE_SCRIPT` | comma-separated moves | Consumed by the service frontend to drive automation runs. |
+| `TICTACTOE_SCRIPT_FILE` | filesystem path | Alternative to `TICTACTOE_SCRIPT` if you store scripts in files. |
+| `TICTACTOE_AUTOMATION_OUTPUT` | filesystem path | Where automation results are written as JSON. |
+| `TICTACTOE_AUTOMATION_LABEL` | any string | Stored in the automation summary for traceability. |
+| `TICTACTOE_AUTOMATION_QUIET` | `0` / `1` | Controls whether the service frontend prints to stdout. |
 
 Setting `TICTACTOE_UI=headless` automatically flips `TICTACTOE_HEADLESS=1`, which is
 useful for CI smoke tests that still exercise the GUI bootstrap path without a Tk
@@ -163,9 +171,16 @@ Need scripted or fully automated CLI sessions? Invoke the CLI module directly so
 you can access its own flags (such as `--script` and `--quiet`):
 
 ```bash
-# Replay a deterministic move list without rendering the ASCII board
-python -m tictactoe.ui.cli.main --script 0,4,8 --quiet
+# Replay a deterministic move list and capture JSON output for CI
+python -m tictactoe.ui.cli.main --script 0,4,8 --output-json artifacts/automation.json
+
+# Load moves from a file and tag the run for dashboards
+python -m tictactoe.ui.cli.main --script-file scripts/demo.moves --label nightly-seed
 ```
+
+When you don't want to pass CLI flags, switch to the service frontend (`--ui service`) 
+and configure the environment variables above. This is handy for installer smoke
+tests or GitHub Actions jobs that already manage state through env vars.
 
 #### Swap the View Adapter
 

@@ -10,6 +10,7 @@ Keep the repository focused on being a reusable CustomTkinter starter kit instea
 ## 2. Offer Multiple Frontend Entry Points
 - Extend `src/tictactoe/__main__.py` to include more than the GUI launcher: add a CLI automation mode (`src/tictactoe/ui/cli/main.py`) and a headless/service entry point that showcases scripting or batch workflows.
 - Document how to register additional frontends in the `FRONTENDS` map and surface selectors via CLI flags and `TICTACTOE_UI`-style environment variables for installer/CI parity.
+- ✅ Implemented: `tictactoe.__main__` now dispatches `gui`, `headless`, `cli`, and `service` targets. The CLI gained script/file/JSON automation helpers while the new `tictactoe.ui.service.main` entry point consumes env vars (`TICTACTOE_SCRIPT`, etc.) so CI and installers can trigger headless runs without extra flags. README documents the new flags and environment overrides.
 
 ## 3. Promote Configuration to Named Themes
 - In `tictactoe.config.gui`, bundle at least two `GameViewConfig` presets (e.g., `LightTheme`, `DarkTheme`, `EnterpriseBrand`) and describe them in `docs/CONFIGURATION.md` with before/after screenshots when possible.

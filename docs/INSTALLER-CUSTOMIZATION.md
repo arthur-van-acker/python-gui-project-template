@@ -1,7 +1,7 @@
 # Installer Customization Guide
 
 `wheel-builder.bat` generates two scripts per build:
-- `installation.bat` — interactive installer that deploys to `%LOCALAPPDATA%\Programs\ttt.v0.1.0` and provisions a virtual environment.
+- `installation.bat` — interactive installer that deploys to `%LOCALAPPDATA%\Programs\yourapp-starter-<version>` (or `%TEMP%` when `--ci` is used) and provisions a virtual environment.
 - `tic-tac-toe-starter.vbs` — silent launcher that runs `pythonw.exe -m tictactoe` without a console window.
 
 This document explains how to tailor those scripts for new product names, install paths, or deployment requirements.
@@ -13,8 +13,8 @@ This document explains how to tailor those scripts for new product names, instal
 ## Common Customizations
 
 ### 1. Installation Directory
-- Change `set INSTALL_DIR=%LOCALAPPDATA%\Programs\ttt.v0.1.0` near the top of the generated installer block.
-- When templating via `wheel-builder.bat`, update the `echo set INSTALL_DIR=...` line so future builds use the new path.
+- Adjust the `PRODUCT_NAME`, `APP_SLUG`, or `INSTALL_DIR_NAME` variables near the top of `wheel-builder.bat`. The installer template ultimately uses `INSTALL_DIR=%INSTALL_ROOT%`, so changing these values ensures every regenerated script points at the new path.
+- When you need to override the destination without editing the template, pass `--install-root "C:\Custom\Path"` to `wheel-builder.bat`; the flag is baked into `installation.bat`.
 - For machine-wide installs, point to `%ProgramFiles%\YourApp` and run the installer from an elevated prompt.
 
 ### 2. Shortcut Names & Icons
@@ -52,7 +52,8 @@ For SCCM/Intune packaging:
 
 ## Versioning the Installer
 When bumping the application version:
-- Update `INSTALL_DIR` suffix (`ttt.v0.1.0`) in `wheel-builder.bat` to the new semantic version or a channel name (`myapp.v1`).
-- Consider preserving previous installs by including the version (`ttt.v1.2.0`) so users can test side-by-side builds.
+- Update `version = "x.y.z"` in `pyproject.toml`; `wheel-builder.bat` reads that value automatically when generating `INSTALL_DIR_NAME`.
+- If you prefer channel-style directories (e.g., `myapp.beta`), edit `APP_SLUG` or `INSTALL_DIR_NAME` accordingly before running the build.
+- Consider preserving previous installs by keeping the version inside the directory name so testers can keep multiple builds side-by-side.
 
 By funneling all installer edits through `wheel-builder.bat`, you guarantee every distribution pack remains consistent and traceable in git, removing guesswork for future template adopters.

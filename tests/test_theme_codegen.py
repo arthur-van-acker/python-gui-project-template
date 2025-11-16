@@ -16,7 +16,11 @@ def test_generate_dataclass_snippet_contains_sections(tmp_path: Path) -> None:
     payload = {"text": {"title": "Doc Test"}}
     config = deserialize_game_view_config(payload)
 
-    snippet = tg.generate_dataclass_snippet(config, "doc_theme", source=tmp_path / "doc.json")
+    snippet = tg.generate_dataclass_snippet(
+        config,
+        "doc_theme",
+        source=tmp_path / "doc.json",
+    )
 
     assert "doc_theme = GameViewConfig(" in snippet
     assert "TextConfig(" in snippet

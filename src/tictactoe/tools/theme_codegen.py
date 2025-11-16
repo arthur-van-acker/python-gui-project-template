@@ -205,7 +205,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         if not path.exists():
             raise FileNotFoundError(path)
         config = load_theme_config(path)
-        variable_name = _derive_variable_name(path, args.variable_prefix, args.variable_suffix)
+        variable_name = _derive_variable_name(
+            path,
+            args.variable_prefix,
+            args.variable_suffix,
+        )
         snippets.append(generate_dataclass_snippet(config, variable_name, source=path))
 
     output = _join_snippets(snippets)

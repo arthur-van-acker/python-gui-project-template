@@ -69,7 +69,18 @@ if exist build rmdir /s /q build
 if exist dist rmdir /s /q dist
 if exist src\tictactoe.egg-info rmdir /s /q src\tictactoe.egg-info
 
-python -m build --wheel
+if not exist .venv\Scripts\python.exe (
+    echo ERROR: Project virtual environment not found. Please create/activate .venv first.
+    exit /b 1
+)
+
+call .venv\Scripts\activate.bat
+if errorlevel 1 (
+    echo ERROR: Failed to activate .venv; ensure it exists and you have permission to run scripts.
+    exit /b 1
+)
+
+.venv\Scripts\python.exe -m build --wheel
 if errorlevel 1 (
     echo Build failed.
     exit /b 1
@@ -111,39 +122,39 @@ echo set "SHORTCUT_NAME=%SHORTCUT_NAME%"
 echo set "WHEEL_FILE=%WHEEL_FILE%"
 echo set "ASSET_SOURCE=%%~dp0assets"
 echo.
-echo echo Installing !PRODUCT_NAME! v!PRODUCT_VERSION!
-echo echo Target directory: !INSTALL_DIR!
+echo echo Installing %%PRODUCT_NAME%% v%%PRODUCT_VERSION%%
+echo echo Target directory: %%INSTALL_DIR%%
 echo echo.
-echo if exist "!INSTALL_DIR!" ^(
+echo if exist "%%INSTALL_DIR%%" ^(
 echo     echo Found prior installation. Removing it...
 echo     rmdir /s /q "!INSTALL_DIR!"
 echo ^)
-echo mkdir "!INSTALL_DIR!"
+echo mkdir "%%INSTALL_DIR%%"
 echo.
 echo echo Copying release bundle...
-echo xcopy /E /I /Y "%%~dp0*.*" "!INSTALL_DIR!\" ^>nul
+echo xcopy /E /I /Y "%%~dp0*.*" "%%INSTALL_DIR%%\" ^>nul
 echo.
 echo echo Creating isolated virtual environment...
-echo python -m venv "!INSTALL_DIR!\.venv"
+echo python -m venv "%%INSTALL_DIR%%\.venv"
 echo if errorlevel 1 ^(
 echo     echo Failed to create the virtual environment. Aborting install.
 echo     exit /b 1
 echo ^)
-echo call "!INSTALL_DIR!\.venv\Scripts\activate.bat"
+echo call "%%INSTALL_DIR%%\.venv\Scripts\activate.bat"
 echo echo Installing wheel package...
-echo pip install "!INSTALL_DIR!\!WHEEL_FILE!"
+echo pip install "%%INSTALL_DIR%%\%%WHEEL_FILE%%"
 echo if errorlevel 1 ^(
 echo     echo Package installation failed.
 echo     exit /b 1
 echo ^)
 echo.
-echo if exist "!ASSET_SOURCE!" ^(
+echo if exist "%%ASSET_SOURCE%%" ^(
 echo     echo Copying assets...
-echo     xcopy /E /I /Y "!ASSET_SOURCE!" "!INSTALL_DIR!\assets" ^>nul
+echo     xcopy /E /I /Y "%%ASSET_SOURCE%%" "%%INSTALL_DIR%%\assets" ^>nul
 echo ^)
 echo.
 echo echo Running post-install smoke test...
-echo call "!INSTALL_DIR!\.venv\Scripts\python.exe" -m tictactoe --ui service --script %SMOKE_SCRIPT% --quiet --label installer-smoke
+echo call "%%INSTALL_DIR%%\.venv\Scripts\python.exe" -m tictactoe.ui.service.main
 echo if errorlevel 1 ^(
 echo     echo Smoke test failed. Installation aborted.
 echo     exit /b 1
@@ -155,7 +166,7 @@ echo for /f "usebackq tokens=3*" %%%%A in ^(`reg query "HKEY_CURRENT_USER\Softwa
 echo set DESKTOP=%%DESKTOP:~0,-1%%
 echo if "%%DESKTOP:~-1%%"==" " set DESKTOP=%%DESKTOP:~0,-1%%
 echo call set DESKTOP=%%DESKTOP%%
-echo set SCRIPT_DIR=!INSTALL_DIR!\
+echo set SCRIPT_DIR=%%INSTALL_DIR%%\
 echo set ICON_PATH=%%SCRIPT_DIR%%favicon.ico
 echo set VBS_PATH=%%SCRIPT_DIR%%tic-tac-toe-starter.vbs
 echo echo Set oWS = CreateObject("WScript.Shell"^) ^> "%%TEMP%%\create_yourapp_shortcut.vbs"
@@ -169,7 +180,7 @@ echo cscript //nologo "%%TEMP%%\create_yourapp_shortcut.vbs"
 echo del "%%TEMP%%\create_yourapp_shortcut.vbs"
 echo.
 echo echo Writing install manifest...
-echo powershell -NoProfile -Command "$manifest = @{ ProductName = '!PRODUCT_NAME!'; Version = '!PRODUCT_VERSION!'; InstallDir = '!INSTALL_DIR!'; Wheel = '!WHEEL_FILE!' }; $manifest | ConvertTo-Json -Depth 2 | Set-Content -Path '!INSTALL_DIR!\install-info.json' -Encoding UTF8"
+echo powershell -NoProfile -Command "$manifest = @{ ProductName = '%%PRODUCT_NAME%%'; Version = '%%PRODUCT_VERSION%%'; InstallDir = '%%INSTALL_DIR%%'; Wheel = '%%WHEEL_FILE%%' }; $manifest | ConvertTo-Json -Depth 2 | Set-Content -Path '%%INSTALL_DIR%%\install-info.json' -Encoding UTF8"
 echo.
 echo echo Installation complete!
 echo echo Shortcut created: !SHORTCUT_NAME!

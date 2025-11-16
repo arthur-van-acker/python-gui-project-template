@@ -1,110 +1,80 @@
-# Tic Tac Toe - Installation Guide
+# YourApp Starter – Installation Guide
 
-This guide provides step-by-step instructions for installing the Tic Tac Toe game on your Windows computer.
+This guide walks you through installing the published YourApp Starter bundle so you can evaluate the template packaging flow. The GUI still looks like the Tic Tac Toe sample, but the domain layer is intentionally left as a stub—clicking the board raises `NotImplementedError` to remind adopters to plug in their own business rules.
 
 ## System Requirements
 
-- **Operating System:** Windows 10 or later
-- **Python:** Python 3.8 or higher (must be installed on your system)
-- **Internet Connection:** Required for downloading dependencies during installation
+- **Operating System:** Windows 10 or Windows 11 (64-bit)
+- **Python:** Version 3.8 or later available on `PATH` (the installer bootstraps its own virtual environment using whichever `python` it finds)
+- **Internet Connection:** Required the first time the installer downloads dependencies from PyPI
 
-> **Note:** The game installs in its own isolated virtual environment, so it won't interfere with any other Python packages you may have installed.
+> The installer creates an isolated `.venv` inside the install directory so nothing leaks into your global Python environment.
 
 ## Installation Steps
 
-### Step 1: Download the Game
+### Step 1: Download the Bundle
 
-Download the `tic-tac-toe.zip` file to your computer.
+- Grab the latest `yourapp-starter-artifacts.zip` from the GitHub Releases page **or** run `wheel-builder.bat` locally and copy everything under `dist/` to your target machine.
 
 ### Step 2: Extract the ZIP File
 
-1. Locate the downloaded `tic-tac-toe.zip` file (usually in your Downloads folder)
-2. Right-click on the ZIP file
-3. Select **"Extract All..."** from the context menu
-4. Choose a destination folder (or keep the default)
-5. Click **"Extract"**
-
-A new folder will be created containing the game files.
+1. Right-click the ZIP file and select **Extract All...**
+2. Choose a destination folder. After extraction you should see `installation.bat`, `tic-tac-toe-starter.vbs`, the wheel file, and the `assets/` directory.
 
 ### Step 3: Run the Installer
 
 1. Open the extracted folder
-2. Locate the file named **`installation.bat`**
-3. **Double-click** on `installation.bat` to run it
+2. Double-click **`installation.bat`**
+3. If Windows SmartScreen appears, choose **More info → Run anyway** (the script is unsigned by design so adopters can add their own signing step)
 
-   > **Note:** If Windows SmartScreen appears, click **"More info"** and then **"Run anyway"**
+### Step 4: What the Installer Does
 
-### Step 4: Installation Process
+During the run you will see status messages for each of these actions:
 
-The installer will automatically:
+1. Remove any previous install directory automatically (no manual uninstall required)
+2. Create `%LOCALAPPDATA%\Programs\yourapp-starter-<version>` (or `%TEMP%\yourapp-starter-<version>` when the bundle was built with `--ci`)
+3. Copy every file from the extracted folder into that directory, including `assets/`
+4. Create a private virtual environment inside `<install>\.venv`
+5. Install the wheel (`tictactoe-<version>-py3-none-any.whl`) plus runtime dependencies (CustomTkinter, Pillow, darkdetect, packaging)
+6. Run a smoke test via `python -m tictactoe --ui service --script 0,4,8 --quiet --label installer-smoke`
+7. Drop a desktop shortcut named **YourApp Starter.lnk** that launches `tic-tac-toe-starter.vbs`
+8. Write `install-info.json`, `license.txt`, and `how-to-install-me.txt` beside the binaries for inventory purposes
 
-1. **Check for and remove any existing installation** (if present)
-   - This ensures a clean installation every time
-   - You don't need to manually uninstall old versions
+### Step 5: Wait for Confirmation
 
-2. Create an installation directory at:
-   ```
-   C:\Users\YourUsername\AppData\Local\Programs\ttt.v0.1.0
-   ```
+Leave the console window open until it prints **Installation complete! Shortcut created.** Press any key to exit.
 
-3. Copy all game files to this directory
-
-4. Create an isolated virtual environment (Python sandbox)
-
-5. Download and install required dependencies into the virtual environment:
-   - CustomTkinter (for modern UI)
-   - Pillow (for image handling)
-   - darkdetect (for theme detection)
-   - packaging (for version management)
-
-6. Install the Tic Tac Toe game package
-
-7. Create a desktop shortcut named **"Tic Tac Toe"** with the game icon
-
-> **What is a virtual environment?** It's an isolated Python installation that keeps the game's dependencies separate from your system Python. This prevents conflicts and makes uninstallation cleaner.
-
-### Step 5: Wait for Completion
-
-- The installation process may take a minute or two
-- You'll see progress messages in the command window
-- Wait for the message: **"Installation complete! Desktop shortcut created successfully."**
-- Press any key to close the installer window
-
-## Launching the Game
-
-After installation, you have two ways to launch the game:
+## Launching the Template
 
 ### Method 1: Desktop Shortcut (Recommended)
 
-1. Locate the **"Tic Tac Toe"** icon on your desktop
-2. **Double-click** the icon to launch the game
+Double-click **YourApp Starter** on the desktop. The shortcut launches `pythonw.exe -m tictactoe` inside the isolated environment, so no console window flashes.
 
 ### Method 2: Command Line (Frontend Picker)
 
-> **Heads up:** The command-line launcher respects the same isolated virtual environment as the desktop shortcut, so remember to activate `.venv` first. The shortcut is still the fastest way to reach the GUI, but the CLI gives you extra control when scripting or testing.
-
 1. Open PowerShell or Command Prompt
-2. Navigate to the installation folder:
-   ```
-   cd %LOCALAPPDATA%\Programs\ttt.v0.1.0
+2. Navigate to the install directory (replace `<version>` with the number printed by the installer):
+   ```pwsh
+   cd "$env:LOCALAPPDATA\Programs\yourapp-starter-<version>"
    ```
 3. Activate the virtual environment:
+   ```pwsh
+   .\.venv\Scripts\activate
    ```
-   .venv\Scripts\activate
-   ```
-4. Inspect the available frontends (GUI, CLI, headless):
-   ```
+4. Inspect available frontends:
+   ```pwsh
    python -m tictactoe --list-frontends
    ```
-5. Launch the frontend you want:
-   ```
+5. Launch one:
+   ```pwsh
    python -m tictactoe --ui gui      # CustomTkinter desktop (default)
-   python -m tictactoe --ui cli      # Terminal experience
-   python -m tictactoe --ui headless # GUI rendered with the shim for CI smoke tests
+   python -m tictactoe --ui headless # GUI rendered with the shim (for CI)
+   python -m tictactoe --ui cli      # Terminal automation demo
+   python -m tictactoe --ui service  # Env-driven automation/service mode
    ```
-6. Need to automate the CLI? Call it directly so you can pass CLI-only switches:
-   ```
-   python -m tictactoe.ui.cli.main --script 0,4,8 --quiet
+6. Need CLI-only switches? Call the module directly:
+   ```pwsh
+   python -m tictactoe.ui.cli.main --script 0,4,8 --quiet --output-json artifacts/summary.json
    ```
 
 #### Environment Overrides
@@ -113,133 +83,78 @@ Set these variables before launching if you prefer zero-touch automation (PowerS
 
 | Variable | Purpose | Example |
 | --- | --- | --- |
-| `TICTACTOE_UI` | Forces the default frontend when `--ui` is omitted. | `$env:TICTACTOE_UI = "cli"` |
-| `TICTACTOE_HEADLESS` | Tells the GUI bootstrapper to load shim widgets (no Tk required). Automatically set to `1` when you choose the `headless` frontend. | `$env:TICTACTOE_HEADLESS = "1"` |
-| `TICTACTOE_LOGGING` | Enables telemetry/logging hooks for **all** frontends so support teams can capture controller events without editing code. | `$env:TICTACTOE_LOGGING = "1"` |
+| `TICTACTOE_UI` | Forces the default frontend when `--ui` is omitted. | `$env:TICTACTOE_UI = "cli"`
+| `TICTACTOE_HEADLESS` | Forces the GUI bootstrapper to use the shim widgets. Automatically set to `1` when you choose the `headless` frontend. | `$env:TICTACTOE_HEADLESS = "1"`
+| `TICTACTOE_LOGGING` | Enables shared telemetry hooks for **all** frontends via `ControllerHooks.logging_hooks()`. | `$env:TICTACTOE_LOGGING = "1"`
 
-Unset the variables (or close the terminal) to return to the desktop default.
+Close the terminal (or `Remove-Item Env:VARIABLE`) to restore defaults.
 
-> **Tip:** Installers or helpdesk scripts can toggle telemetry for a single session
-> by setting `TICTACTOE_LOGGING` (or per-frontend aliases such as
-> `TICTACTOE_GUI_LOGGING`). All launchers—including the desktop shortcut—will emit
-> controller events through the built-in logging hooks while the environment variable
-> is set.
+> **Tip:** Per-frontend aliases such as `TICTACTOE_GUI_LOGGING`, `TICTACTOE_CLI_LOGGING`, and `TICTACTOE_SERVICE_LOGGING` still work if you only want diagnostics for a single surface.
+
+### What to Expect from the Sample
+
+The bundled domain layer is a teaching stub—it publishes snapshots but intentionally raises `NotImplementedError` when you click the board or run automation scripts. This is normal and highlights where you need to wire in your own business logic when adopting the template.
 
 ## Troubleshooting
 
 ### Python Not Found
+`'python' is not recognized...`
 
-**Error:** `'python' is not recognized as an internal or external command`
+- Install Python 3.8+ from [python.org](https://www.python.org/downloads/) and select **Add Python to PATH** during setup
+- Re-open the terminal (PATH changes propagate to new shells only)
+- Run `installation.bat` again
 
-**Solution:**
-1. Install Python from [python.org](https://www.python.org/downloads/)
-2. During installation, **make sure to check** "Add Python to PATH"
-3. Restart your computer
-4. Run the installer again
+### Installation Failed Midway
 
-### Installation Failed
-
-**Error:** `Installation failed!`
-
-**Solution:**
-1. Make sure you have an internet connection
-2. Try running the installer as Administrator:
-   - Right-click on `installation.bat`
-   - Select **"Run as administrator"**
+- Confirm you have internet access (pip pulls CustomTkinter, Pillow, etc.)
+- Re-run the installer from an elevated PowerShell session (**Run as administrator**) if corporate policies restrict `%LOCALAPPDATA%`
 
 ### Desktop Shortcut Not Working
 
-**Solution:**
-1. Navigate to: `C:\Users\YourUsername\AppData\Local\Programs\ttt.v0.1.0`
-2. Double-click `tic-tac-toe-starter.vbs` to launch the game
-3. If that doesn't work, try running directly:
-   - Navigate to: `C:\Users\YourUsername\AppData\Local\Programs\ttt.v0.1.0\.venv\Scripts`
-   - Double-click `pythonw.exe`
-   - This won't work directly, but you can create a shortcut with target:
-     ```
-     "C:\Users\YourUsername\AppData\Local\Programs\ttt.v0.1.0\.venv\Scripts\pythonw.exe" -m tictactoe
-     ```
+1. Navigate to `%LOCALAPPDATA%\Programs\yourapp-starter-<version>`
+2. Double-click `tic-tac-toe-starter.vbs`
+3. If needed, create a manual shortcut to:
+   ```
+   "%LOCALAPPDATA%\Programs\yourapp-starter-<version>\.venv\Scripts\pythonw.exe" -m tictactoe --ui gui
+   ```
 
-### Game Won't Start
+### Template Fails to Launch
 
-**Solution:**
-1. Make sure the virtual environment was created successfully during installation
-2. Check that this folder exists: `C:\Users\YourUsername\AppData\Local\Programs\ttt.v0.1.0\.venv`
-3. If not, run the installer again
-4. If the folder exists but the game still won't start, try reinstalling:
-   - Delete the folder: `C:\Users\YourUsername\AppData\Local\Programs\ttt.v0.1.0`
-   - Run the installer again
+- Ensure `<install>\.venv` exists; if not, rerun `installation.bat`
+- Delete `%LOCALAPPDATA%\Programs\yourapp-starter-<version>` and reinstall to reset the environment
 
-### Uninstalling Older Versions
+### Cleaning Up Old Builds
 
-**Note:** You don't need to manually uninstall old versions before installing! The installer automatically removes the previous installation.
+- The installer deletes the previous directory automatically. If you want to keep multiple versions, rename the folder before running a new installer.
+- To remove obsolete installs manually, delete `%LOCALAPPDATA%\Programs\yourapp-starter-*` and the corresponding desktop shortcuts.
 
-If you want to manually clean up old installations or versions installed differently:
+## Uninstalling the Template
 
-1. Check for old installation folders:
-   - Navigate to: `C:\Users\YourUsername\AppData\Local\Programs`
-   - Delete any old `ttt.*` folders (the installer handles this automatically for you)
+1. Delete `%LOCALAPPDATA%\Programs\yourapp-starter-<version>`
+2. Remove **YourApp Starter.lnk** from the desktop
 
-2. If you installed a very old version globally (without virtual environment):
-   - Open Command Prompt
-   - Type: `pip uninstall tictactoe`
-   - Press `y` to confirm
+That’s it—no registry keys or global packages remain.
 
-## Uninstalling the Game
+## Files Included in the Release ZIP
 
-### When to Uninstall
-
-You only need to manually uninstall if you want to **completely remove** the game from your system.
-
-**Note:** If you're updating to a newer version, you don't need to uninstall - just run the new installer and it will automatically replace the old version.
-
-### Complete Uninstall (Manual Removal)
-
-Since the game is installed in an isolated virtual environment, uninstallation is very simple:
-
-1. **Delete the installation folder:**
-   - Navigate to: `C:\Users\YourUsername\AppData\Local\Programs`
-   - Delete the `ttt.v0.1.0` folder
-   - This removes the game and all its dependencies
-
-2. **Remove the desktop shortcut:**
-   - Right-click on the "Tic Tac Toe" desktop icon
-   - Select **"Delete"**
-
-That's it! The game is completely removed from your system.
-
-## Files Included
-
-The distribution package contains:
-
-- **`tictactoe-0.1.0-py3-none-any.whl`** - The game package
-- **`installation.bat`** - Automated installer script
-- **`tic-tac-toe-starter.vbs`** - Silent launcher (no console window)
-- **`favicon.ico`** - Game icon (used for desktop shortcut)
+- `tictactoe-<version>-py3-none-any.whl` – the Python package
+- `installation.bat` – interactive installer
+- `tic-tac-toe-starter.vbs` – silent launcher used by the shortcut
+- `assets/` – icons, theme JSON, and other resources copied beside the binaries
+- `license.txt`, `how-to-install-me.txt`, `install-info.json` – helper documents generated by `wheel-builder.bat`
 
 ## Privacy & Security
 
-- The game does **not** collect any personal data
-- The game does **not** require internet access to play (only during installation)
-- All files are stored locally on your computer
-- No information is sent to external servers
+- No telemetry or personal data collection
+- No internet access required after installation completes
+- All code runs from `%LOCALAPPDATA%` under your user account
 
 ## Getting Help
 
-If you encounter any issues not covered in this guide:
-
-1. Check that Python is properly installed and in your PATH
-2. Verify you have an active internet connection during installation
-3. Try running the installer as Administrator
-4. Make sure your antivirus isn't blocking the installation
-
-## Additional Information
-
-- **Version:** 0.1.0
-- **Installation Size:** ~50 MB (including virtual environment and dependencies)
-- **Isolation:** Installed in its own virtual environment - won't affect other Python packages
-- **License:** Zero-Clause BSD (0BSD)
+- Re-run the installer with the console window visible and collect the logs
+- File an issue on GitHub with Windows + Python versions and any error output
+- When adapting the template, document your own org-specific steps here so future teammates can follow along
 
 ---
 
-**Enjoy playing Tic Tac Toe!** 🎮
+**Happy prototyping with YourApp Starter!**

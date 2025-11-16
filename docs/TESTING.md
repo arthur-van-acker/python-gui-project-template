@@ -1,12 +1,12 @@
 # Testing Guide
 
-This document explains everything you need to know to design, write, run, and extend tests for the Tic Tac Toe template. Treat it as a living testing handbook you can adapt when you fork the project for other applications.
+This document explains everything you need to know to design, write, run, and extend tests for the YourApp Starter template. The shipped GUI still resembles Tic Tac Toe, but the domain layer is now a placeholder that documents how adopters should wire in their own logic. Treat this file as a living testing handbook you can adapt when you fork the project for other applications.
 
 ---
 
 ## 1. Testing Philosophy
 
-- **Template-first mindset:** Tests must be easy to reuse when the tic-tac-toe logic is replaced with a different domain. Keep assertions focused on public contracts, not implementation details.
+- **Template-first mindset:** Tests must be easy to reuse when the sample Tic Tac Toe UI is replaced with a different domain. Keep assertions focused on public contracts, not implementation details.
 - **Fast feedback loops:** Default test targets run in seconds and never require a GUI display. GUI coverage relies on the CustomTkinter headless shim so pipelines stay green.
 - **Single-source-of-truth:** `pytest` is the orchestrator. `tox` composes repeatable environments (unit tests, lint, typing) but calls into the same pytest entry points.
 - **High signal over blanket coverage:** Aim for meaningful assertions (state transitions, UI wiring, CLI wiring) rather than hitting every branch mechanically. Coverage is still enforced (>=50%) to catch drift.
@@ -17,7 +17,7 @@ This document explains everything you need to know to design, write, run, and ex
 
 | Layer          | Location                | Purpose                                                                 |
 |----------------|-------------------------|-------------------------------------------------------------------------|
-| Domain unit    | `tests/test_logic.py`   | Deterministic checks for `tictactoe.domain.logic.TicTacToe` contracts.  |
+| Domain placeholder | `tests/test_logic.py`   | Verifies the neutral `ExampleState` snapshots and documents that `dispatch_action` raises until adopters implement their own rules. |
 | CLI smoke      | `tests/test_cli.py`     | Ensures the entry point loads the intended frontend.                    |
 | Config sanity  | `tests/test_config.py`  | Guards template metadata (e.g., exported symbols).                      |
 | GUI smoke      | `tests/test_gui.py`     | Validates widget creation, event wiring, and state rendering.           |
@@ -28,11 +28,11 @@ This document explains everything you need to know to design, write, run, and ex
 ## 3. Toolchain Overview
 
 - **pytest** (core runner) with built-in assertion rewriting.
-- **coverage.py** through `pytest --cov` (configured in `pytest.ini`).
+- **coverage.py / pytest-cov** when you explicitly pass `--cov` (the plugin is installed via `requirements.txt`, but coverage is opt-in).
 - **tox** for matrixed execution (`tox -e py313`, `tox -e lint`).
 - **ruff**, **black**, **mypy** invoked via tox environments or directly for quality gates.
 - **Custom headless widgets** (`tictactoe.ui.gui.headless`) emulate CustomTkinter so GUI tests run anywhere.
-- **pytest.ini guard rails:** `--strict-config`, `--strict-markers`, `--cov=tictactoe`, and `--cov-fail-under=50` are applied automatically so every local run matches CI expectations.
+- **pytest.ini guard rails:** `--strict-config`, `--strict-markers`, and `-ra` keep marker usage honest and surface failures consistently with CI.
 
 ---
 
@@ -74,7 +74,7 @@ python -m tox --version
 python -m pytest
 ```
 
-Outputs include coverage stats thanks to `pytest.ini`.
+Add `--cov=tictactoe --cov-report=term-missing` if you also want coverage numbers during the run.
 
 ### 5.2 Filter by Marker
 
@@ -95,7 +95,7 @@ python -m tox                   # run everything configured
 ### 5.4 Targeting a Single Test
 
 ```pwsh
-python -m pytest tests/test_logic.py -k draw_game
+python -m pytest tests/test_logic.py -k dispatch_action
 ```
 
 ### 5.5 Exercising the CLI Script Mode
@@ -110,8 +110,9 @@ directly:
 python -m tictactoe.ui.cli.main --script 0,3,4,6,8 --quiet
 ```
 
-This mirrors exactly what the tests assert: scripted move sequences raise
-`SystemExit` on invalid positions and produce the same snapshots as the GUI.
+This mirrors exactly what the tests assert today: scripted move sequences raise
+`SystemExit` on invalid positions and emit the same automation summaries that
+the service/CLI frontends use in CI.
 
 ---
 
@@ -204,30 +205,28 @@ Benefits:
 
 ## 9. Coverage Expectations
 
-- `pytest.ini` enforces a minimum 50% project coverage. Failing to meet the threshold breaks the test suite.
-- To inspect coverage details:
+- Coverage is opt-in. Pass `--cov=tictactoe --cov-report=term-missing` (or configure `pytest-cov` via `tox.ini`) whenever you need a report.
+- Example command:
 
 ```pwsh
-python -m pytest --cov-report=term-missing
+python -m pytest --cov=tictactoe --cov-report=term-missing
 ```
 
-- Add targeted tests instead of blanket mocks to raise coverage meaningfully.
+- Focus on meaningful assertions—raising coverage by exercising real contracts is more valuable than stubbing everything out.
 
 ---
 
 ## 10. Continuous Integration Recommendations
 
-Even though this repo does not ship a CI workflow by default, the testing strategy assumes CI will:
+The repository already ships `.github/workflows/ci.yml`, which runs on Ubuntu and performs the following steps:
 
-1. Install dependencies (same commands as Section 4).
-2. Run `python -m pytest -m "not gui"` for fast feedback (this mirrors the
-    command baked into `tox -e py313`).
-3. Optionally run GUI tests in headless mode (set `TICTACTOE_HEADLESS=1` or invoke
-    `python -m tictactoe --ui headless` before launching the suite).
-4. Execute `python -m tox -e lint,type` to enforce formatting and typing standards.
-5. Archive coverage XML/HTML if needed for dashboards.
+1. Install dependencies from `requirements.txt` (which also installs the project in editable mode).
+2. Run Black and Ruff in check mode.
+3. Execute `python -m mypy src` for type checking.
+4. Run `python -m pytest -m "not gui"` with `TICTACTOE_HEADLESS=1` to exercise the non-GUI suite.
+5. Build the wheel with `python -m build --wheel` and reinstall it to ensure packaging metadata stays valid.
 
-When adding a workflow (`.github/workflows/tests.yml`), remember to install `python -m pip install tox` and set `TICTACTOE_HEADLESS=1`.
+Use `scripts/run-ci.ps1` / `scripts/run-ci.sh` locally to mirror those checks, and extend the workflow (or add a Windows job) if you need GUI smoke tests, coverage uploads, or installer verification in CI.
 
 ---
 

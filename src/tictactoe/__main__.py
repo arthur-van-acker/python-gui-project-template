@@ -7,6 +7,7 @@ import importlib
 import json
 import os
 import sys
+from collections.abc import Mapping as MappingABC
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Mapping, MutableMapping, Optional, Sequence, cast
@@ -125,11 +126,21 @@ def _apply_env_overrides(overrides: Mapping[str, str]) -> None:
         os.environ[key] = value
 
 
+def _ensure_mapping(payload: Any) -> Mapping[str, Any]:
+    """Validate theme payloads that originated from JSON."""
+
+    if not isinstance(payload, MappingABC):
+        message = "Theme payloads must deserialize to a mapping"
+        raise TypeError(message)
+    return cast(Mapping[str, Any], payload)
+
+
 def _load_theme_from_json(path: Path) -> Optional[Mapping[str, Any]]:
     if not path.exists():
         raise FileNotFoundError(path)
     with path.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+        data = json.load(handle)
+    return _ensure_mapping(data)
 
 
 def _resolve_theme_payload(args) -> Optional[Mapping[str, Any]]:
@@ -146,7 +157,7 @@ def _resolve_theme_payload(args) -> Optional[Mapping[str, Any]]:
 
     payload = os.environ.get(_THEME_PAYLOAD_ENV_VAR)
     if payload:
-        return json.loads(payload)
+        return _ensure_mapping(json.loads(payload))
 
     return None
 

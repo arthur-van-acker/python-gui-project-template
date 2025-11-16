@@ -7,8 +7,8 @@ This template ships with repeatable local tooling plus hooks you can adapt to an
 | Tool | Location | Purpose |
 | --- | --- | --- |
 | **pre-commit** | `.pre-commit-config.yaml` | Runs formatting, linting, typing, and pytest (non-GUI marker) on each commit/push. Mirrors the checks enforced in CI.
-| **tox** | `tox.ini` | Defines shared environments: `lint` (Ruff, Black), `type` (Mypy), and `py313` (pytest suite). Invoked by scripts and CI.
-| **run-ci.ps1 / run-ci.sh** | `scripts/` | Convenience wrappers that install requirements and execute the tox matrix on Windows/macOS/Linux.
+| **tox** | `tox.ini` | Defines shared environments: `lint` (Ruff, Black), `type` (Mypy), and `py313` (pytest suite). Use it when you want hermetic virtualenvs; the default CI runs the underlying tools directly.
+| **run-ci.ps1 / run-ci.sh** | `scripts/` | Convenience wrappers that install requirements, run Black/Ruff/Mypy, execute both pytest marker sets, and perform installer smoke tests (Windows) or sandboxed wheel runs (POSIX).
 | **pytest markers** | `pytest.ini` | Split GUI vs. non-GUI tests so headless environments can skip UI smoke tests by default.
 
 ## Recommended Developer Workflow
@@ -17,7 +17,7 @@ This template ships with repeatable local tooling plus hooks you can adapt to an
 3. For GUI regressions, run `python -m pytest -m gui` which exercises the CustomTkinter headless shim.
 
 ## Sample GitHub Actions Workflow
-Save as `.github/workflows/ci.yml` (adjust Python versions as needed):
+If you prefer a tox-driven pipeline, start from the following example (adjust Python versions as needed):
 
 ```yaml
 name: CI
@@ -48,6 +48,8 @@ jobs:
         if: matrix.python-version == '3.13'
         run: python -m pytest --cov=tictactoe --cov-report=xml
 ```
+
+> The repository’s checked-in `.github/workflows/ci.yml` currently mirrors the `run-ci` scripts by running the linters/type checker/pytest directly instead of invoking tox. Use whichever style matches your team’s conventions.
 
 ## Extending to Release Pipelines
 - Add a `release` job that depends on `tests`, runs `wheel-builder.bat` (or PowerShell equivalent on Windows runners), and uploads `dist/` as an artifact.

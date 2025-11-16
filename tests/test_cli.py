@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from tictactoe.controller import ControllerHooks
 from tictactoe.ui.cli import main as cli_main
 from tictactoe.ui.service import main as service_main
 
@@ -177,6 +178,34 @@ def test_cli_script_quiet_suppresses_output(tmp_path, capsys):
     assert outfile.exists()
 
 
+def test_cli_emits_controller_hooks():
+    events = []
+
+    def record(event):
+        events.append((event.channel, event.action))
+
+    hooks = ControllerHooks(view=record, domain=record)
+
+    cli_main.main(["--script", "0"], controller_hooks=hooks)
+
+    assert ("view", "script_started") in events
+    assert ("domain", "automation_summary_ready") in events
+
+
+def test_cli_global_logging_flag(monkeypatch):
+    events = []
+
+    def fake_logging_hooks():
+        return ControllerHooks(view=lambda event: events.append((event.channel, event.action)))
+
+    monkeypatch.setattr(cli_main, "logging_hooks", fake_logging_hooks)
+    monkeypatch.setenv("TICTACTOE_LOGGING", "1")
+
+    cli_main.main(["--script", "0", "--quiet"])
+
+    assert ("view", "script_started") in events
+
+
 def test_cli_placeholder_message_when_no_args(capsys):
     cli_main.main([])
     output = capsys.readouterr().out
@@ -204,3 +233,32 @@ def test_service_warns_when_no_script(monkeypatch, capsys):
 
     output = capsys.readouterr().out
     assert "No script provided" in output
+
+
+def test_service_emits_controller_hooks(monkeypatch):
+    monkeypatch.delenv("TICTACTOE_SCRIPT", raising=False)
+    events = []
+
+    def record(event):
+        events.append((event.channel, event.action))
+
+    hooks = ControllerHooks(view=record, domain=record)
+
+    service_main.main(["--script", "0"], controller_hooks=hooks)
+
+    assert ("view", "script_resolved") in events
+    assert ("domain", "automation_summary_ready") in events
+
+
+def test_service_global_logging_flag(monkeypatch):
+    events = []
+
+    def fake_logging_hooks():
+        return ControllerHooks(view=lambda event: events.append((event.channel, event.action)))
+
+    monkeypatch.setattr(service_main, "logging_hooks", fake_logging_hooks)
+    monkeypatch.setenv("TICTACTOE_LOGGING", "yes")
+
+    service_main.main(["--script", "0", "--verbose"])
+
+    assert ("view", "script_resolved") in events

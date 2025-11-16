@@ -40,7 +40,7 @@ This template layers the application so domain logic, presentation, configuratio
 - Useful for scripting and regression testing when GUI dependencies are unavailable.
 
 ## Configuration Layer
-- `config/gui.py` exposes immutable dataclasses (`GameViewConfig`, `WindowConfig`, etc.) that flow into both GUI implementations.
+- `config/gui.py` exposes immutable data classes (`GameViewConfig`, `WindowConfig`, etc.) that flow into both GUI implementations.
 - Changing fonts, padding, copy, or colors happens here instead of scattering constants through widgets.
 
 ## Installer & Distribution

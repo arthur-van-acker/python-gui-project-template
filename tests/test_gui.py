@@ -10,6 +10,7 @@ os.environ.setdefault("TICTACTOE_HEADLESS", "1")
 
 import pytest
 
+from tictactoe.controller import ControllerHooks
 from tictactoe.config import WindowConfig
 from tictactoe.domain.logic import GameState, TicTacToe
 from tictactoe.ui.gui.headless_view import HeadlessGameView
@@ -91,6 +92,26 @@ def test_gui_win_updates_status_message():
 
         assert app.game.state == GameState.X_WON
         assert "wins" in app.view.status_text()
+    finally:
+        app.root.destroy()
+
+
+@pytest.mark.gui
+def test_gui_emits_controller_hooks():
+    events = []
+
+    def record(event):
+        events.append(event)
+
+    hooks = ControllerHooks(view=record, domain=record)
+    app = _create_app_or_skip(controller_hooks=hooks)
+    try:
+        assert any(e.channel == "view" and e.action == "initialized" for e in events)
+        assert any(e.channel == "domain" and e.action == "snapshot" for e in events)
+
+        events.clear()
+        app._reset_game()
+        assert any(e.channel == "view" and e.action == "reset_requested" for e in events)
     finally:
         app.root.destroy()
 

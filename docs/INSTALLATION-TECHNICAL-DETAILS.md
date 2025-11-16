@@ -287,6 +287,7 @@ When the user launches the game via the desktop shortcut:
   - Specs can set additional variables before the frontend starts
   - The `headless` spec forces `TICTACTOE_HEADLESS=1`, which tells the GUI bootstrapper to import `tictactoe.ui.gui.headless_view` instead of the real CustomTkinter primitives
   - Installers can also pre-set `TICTACTOE_UI` globally (or per shortcut) to bias which frontend launches when users double-click
+  - All specs now honor the shared `TICTACTOE_LOGGING` flag; when set (or when a legacy alias such as `TICTACTOE_GUI_LOGGING` is toggled) each frontend automatically wires up the `ControllerHooks.logging_hooks()` helper so controller events land in the installer console or your own log collectors
 
 ### 8. **Frontend Launch**
   - `FrontendSpec.load()` uses `importlib` to fetch the target callable lazily

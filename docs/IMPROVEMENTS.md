@@ -28,6 +28,6 @@ Keep the repository focused on being a reusable CustomTkinter starter kit instea
 - ✅ Implemented: `README.md` now leads with the YourApp Starter branding, adds an adoption roadmap, and highlights the required config knobs/tests. `docs/TEMPLATE-USAGE-GUIDE.md` explains how to rename the package and swap the sample logic, while `docs/TEMPLATE-CHECKLIST.md` is reorganized into a linear workflow with direct links to the referenced files/sections.
 
 ## 6. Optional Stretch Ideas
-- Provide a `controller/` package stub and show how to register telemetry/logging hooks in `ui/gui/main.py`.
+- ✅ Provide a `controller/` package stub and show how to register telemetry/logging hooks in `ui/gui/main.py`. `tictactoe.controller` now ships with `ControllerHooks` plus a `logging_hooks()` helper, and every frontend honors the shared `TICTACTOE_LOGGING` flag (with legacy `*_LOGGING` env vars still supported) so teams can flip on telemetry without changing code.
 - Include sample JSON theme files plus a script that converts them into dataclasses for rapid prototyping.
 - Add a GitHub Actions workflow that runs the CI script and attaches installer artifacts, illustrating how teams can publish releases automatically.

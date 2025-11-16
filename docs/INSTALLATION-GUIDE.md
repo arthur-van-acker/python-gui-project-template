@@ -115,8 +115,15 @@ Set these variables before launching if you prefer zero-touch automation (PowerS
 | --- | --- | --- |
 | `TICTACTOE_UI` | Forces the default frontend when `--ui` is omitted. | `$env:TICTACTOE_UI = "cli"` |
 | `TICTACTOE_HEADLESS` | Tells the GUI bootstrapper to load shim widgets (no Tk required). Automatically set to `1` when you choose the `headless` frontend. | `$env:TICTACTOE_HEADLESS = "1"` |
+| `TICTACTOE_LOGGING` | Enables telemetry/logging hooks for **all** frontends so support teams can capture controller events without editing code. | `$env:TICTACTOE_LOGGING = "1"` |
 
 Unset the variables (or close the terminal) to return to the desktop default.
+
+> **Tip:** Installers or helpdesk scripts can toggle telemetry for a single session
+> by setting `TICTACTOE_LOGGING` (or per-frontend aliases such as
+> `TICTACTOE_GUI_LOGGING`). All launchers—including the desktop shortcut—will emit
+> controller events through the built-in logging hooks while the environment variable
+> is set.
 
 ## Troubleshooting
 

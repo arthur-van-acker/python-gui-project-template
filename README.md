@@ -168,10 +168,16 @@ Environment variables offer zero-touch overrides for installers or CI:
 | `TICTACTOE_AUTOMATION_OUTPUT` | filesystem path | Where automation results are written as JSON. |
 | `TICTACTOE_AUTOMATION_LABEL` | any string | Stored in the automation summary for traceability. |
 | `TICTACTOE_AUTOMATION_QUIET` | `0` / `1` | Controls whether the service frontend prints to stdout. |
+| `TICTACTOE_LOGGING` | `0` / `1` / `true` / `false` | Turns on telemetry/logging hooks for **all** frontends at once. Legacy `TICTACTOE_GUI_LOGGING`, `TICTACTOE_CLI_LOGGING`, and `TICTACTOE_SERVICE_LOGGING` still work for per-frontend overrides. |
 
 Setting `TICTACTOE_UI=headless` automatically flips `TICTACTOE_HEADLESS=1`, which is
 useful for CI smoke tests that still exercise the GUI bootstrap path without a Tk
 runtime.
+
+Need targeted diagnostics without editing code? Export `TICTACTOE_LOGGING=1` (or one
+of the legacy `*_LOGGING` vars) before launching. Every frontend will automatically
+use the built-in `ControllerHooks.logging_hooks()` helper so you can capture
+controller telemetry in the terminal or installer logs.
 
 Need scripted or fully automated CLI sessions? Invoke the CLI module directly so
 you can access its own flags (such as `--script` and `--quiet`):

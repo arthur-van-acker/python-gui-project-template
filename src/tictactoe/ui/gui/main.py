@@ -6,6 +6,11 @@ import json
 import os
 from typing import Any, Callable, Optional, Protocol
 
+from tictactoe.controller import (
+    ControllerHooks,
+    logging_hooks,
+    telemetry_logging_requested,
+)
 from tictactoe.config import GameViewConfig, WindowConfig, deserialize_game_view_config
 from tictactoe.domain.logic import GameSnapshot, TicTacToe
 from tictactoe.ui.gui import bootstrap
@@ -16,6 +21,13 @@ from tictactoe.ui.gui.view import GameView
 bootstrap.configure_windows_app_model()
 
 _THEME_PAYLOAD_ENV_VAR = "TICTACTOE_THEME_PAYLOAD"
+_GUI_TELEMETRY_ENV_VAR = "TICTACTOE_GUI_LOGGING"
+
+
+def _telemetry_logging_requested() -> bool:
+    return telemetry_logging_requested(_GUI_TELEMETRY_ENV_VAR)
+
+
 def _theme_from_env() -> Optional[GameViewConfig]:
     payload = os.environ.get(_THEME_PAYLOAD_ENV_VAR)
     if not payload:
@@ -28,8 +40,6 @@ def _theme_from_env() -> Optional[GameViewConfig]:
         return deserialize_game_view_config(data)
     except Exception:
         return None
-
-
 
 GameFactory = Callable[[], TicTacToe]
 
@@ -75,11 +85,13 @@ class TicTacToeGUI:
         view_factory: Optional[ViewFactory] = None,
         window_config: Optional[WindowConfig] = None,
         view_config: Optional[GameViewConfig] = None,
+        controller_hooks: Optional[ControllerHooks] = None,
     ):
         """Initialize the GUI application with injectable hooks."""
 
         self._game_factory = game_factory or TicTacToe
         self._view_factory = view_factory or _build_default_view
+        self._controller_hooks = controller_hooks
         self.window_config = window_config or WindowConfig()
         env_view_config = _theme_from_env()
         self.view_config = view_config or env_view_config or GameViewConfig()
@@ -109,6 +121,11 @@ class TicTacToeGUI:
             view_config=self.view_config,
         )
         self.view.build()
+        self._emit_view_event(
+            "initialized",
+            view=self.view.__class__.__name__,
+            theme=self.view_config.text.title,
+        )
 
         self.game.add_listener(self._on_game_updated)
         self._on_game_updated(self.game.snapshot)
@@ -124,11 +141,25 @@ class TicTacToeGUI:
 
     def _on_cell_click(self, position: int):
         """Handle cell button click."""
-        self.game.make_move(position)
+        self._emit_view_event("cell_click", position=position)
+        try:
+            self.game.make_move(position)
+        except Exception as exc:
+            self._report_controller_error(exc, action="cell_click", position=position)
+            raise
 
     def _on_game_updated(self, snapshot: GameSnapshot) -> None:
         """Render the latest game snapshot to the UI widgets."""
 
+        self._emit_domain_event(
+            "snapshot",
+            state=snapshot.state.value,
+            current_player=snapshot.current_player.value
+            if snapshot.current_player
+            else None,
+            winner=snapshot.winner.value if snapshot.winner else None,
+            notes=len(snapshot.notes),
+        )
         if not self.view.is_ready():
             return
 
@@ -136,7 +167,12 @@ class TicTacToeGUI:
 
     def _reset_game(self):
         """Reset the game to initial state."""
-        self.game.reset()
+        self._emit_view_event("reset_requested")
+        try:
+            self.game.reset()
+        except Exception as exc:
+            self._report_controller_error(exc, action="reset")
+            raise
 
     def run(self):
         """Start the GUI application."""
@@ -146,10 +182,28 @@ class TicTacToeGUI:
         )
         self.root.mainloop()
 
+    def _emit_view_event(self, action: str, **payload: Any) -> None:
+        if not self._controller_hooks:
+            return
+        self._controller_hooks.emit("view", action, **payload)
+
+    def _emit_domain_event(self, action: str, **payload: Any) -> None:
+        if not self._controller_hooks:
+            return
+        self._controller_hooks.emit("domain", action, **payload)
+
+    def _report_controller_error(
+        self, exc: Exception, *, action: str, **payload: Any
+    ) -> None:
+        if not self._controller_hooks:
+            return
+        self._controller_hooks.emit_error(exc, action=action, **payload)
+
 
 def main():
     """Entry point for the GUI application."""
-    app = TicTacToeGUI()
+    hooks = logging_hooks() if _telemetry_logging_requested() else None
+    app = TicTacToeGUI(controller_hooks=hooks)
     app.run()
 
 

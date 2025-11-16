@@ -8,6 +8,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping, MutableMapping, Sequence
 
+from tictactoe.controller import (
+    ControllerHooks,
+    logging_hooks,
+    telemetry_logging_requested,
+)
 from tictactoe.domain.logic import ExampleAction, TicTacToe
 
 
@@ -19,6 +24,33 @@ class AutomationSummary:
     actions: tuple[ExampleAction, ...]
     metadata: Mapping[str, str]
     notes: tuple[str, ...]
+
+
+_CLI_TELEMETRY_ENV_VAR = "TICTACTOE_CLI_LOGGING"
+
+
+def _env_controller_hooks(flag: str = _CLI_TELEMETRY_ENV_VAR) -> ControllerHooks | None:
+    return logging_hooks() if telemetry_logging_requested(flag) else None
+
+
+def _emit_view_event(hooks: ControllerHooks | None, action: str, **payload: Any) -> None:
+    if not hooks:
+        return
+    hooks.emit("view", action, **payload)
+
+
+def _emit_domain_event(hooks: ControllerHooks | None, action: str, **payload: Any) -> None:
+    if not hooks:
+        return
+    hooks.emit("domain", action, **payload)
+
+
+def _report_controller_error(
+    hooks: ControllerHooks | None, exc: Exception, *, action: str, **payload: Any
+) -> None:
+    if not hooks:
+        return
+    hooks.emit_error(exc, action=action, **payload)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -184,28 +216,71 @@ def run_script(
     label: str,
     quiet: bool = False,
     output_json: Path | None = None,
+    controller_hooks: ControllerHooks | None = None,
 ) -> AutomationSummary:
-    summary = build_automation_summary(moves, label=label)
+    moves_tuple = tuple(moves)
+    _emit_view_event(
+        controller_hooks,
+        "script_started",
+        label=label,
+        action_count=len(moves_tuple),
+    )
+    summary = build_automation_summary(moves_tuple, label=label)
+    _emit_domain_event(
+        controller_hooks,
+        "automation_summary_ready",
+        label=label,
+        action_count=len(summary.actions),
+    )
+
     if not quiet:
-        print(render_summary(summary))
+        rendered = render_summary(summary)
+        print(rendered)
+        _emit_view_event(
+            controller_hooks,
+            "summary_rendered",
+            label=label,
+            line_count=rendered.count("\n") + 1,
+        )
+
     if output_json:
         write_summary_json(summary, output_json)
+        _emit_view_event(
+            controller_hooks,
+            "summary_written",
+            label=label,
+            path=str(output_json),
+        )
+
     return summary
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(
+    argv: Sequence[str] | None = None,
+    *,
+    controller_hooks: ControllerHooks | None = None,
+) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
+    hooks = controller_hooks or _env_controller_hooks()
 
     try:
         moves = _resolve_moves(args.script, args.script_file)
     except ValueError as exc:
+        _report_controller_error(hooks, exc, action="parse_script")
         raise SystemExit(str(exc)) from exc
     if moves is None:
+        _emit_view_event(hooks, "placeholder_rendered")
         _print_placeholder_help()
         return 0
 
-    run_script(moves, label=args.label, quiet=args.quiet, output_json=args.output_json)
+    run_script(
+        moves,
+        label=args.label,
+        quiet=args.quiet,
+        output_json=args.output_json,
+        controller_hooks=hooks,
+    )
     return 0
 
 

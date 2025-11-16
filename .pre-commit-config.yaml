@@ -1,0 +1,48 @@
+default_language_version:
+  python: python3
+minimum_pre_commit_version: "3.5.0"
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+  - id: check-yaml
+  - id: check-toml
+- repo: https://github.com/psf/black
+  rev: 24.8.0
+  hooks:
+  - id: black
+    language_version: python3
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.6.7
+  hooks:
+  - id: ruff
+    args: [ "--fix" ]
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.11.2
+  hooks:
+  - id: mypy
+    additional_dependencies:
+    - types-colorama
+- repo: local
+  hooks:
+  - id: pytest-non-gui-commit
+    name: pytest (non-gui suite)
+    entry: python -m pytest -m "not gui"
+    language: system
+    pass_filenames: false
+    stages: [ pre-commit ]
+  - id: pytest-non-gui
+    name: pytest (non-gui suite)
+    entry: python -m pytest -m "not gui"
+    language: system
+    pass_filenames: false
+    stages: [ pre-push ]
+  - id: tox-lint-type
+    name: tox lint+type
+    entry: python -m tox -e lint,type
+    language: system
+    pass_filenames: false
+    stages: [ pre-push ]

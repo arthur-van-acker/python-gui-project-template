@@ -1,6 +1,6 @@
-# Tic Tac Toe - Installation Technical Details
+# YourApp Starter – Installation Technical Details
 
-This document provides a comprehensive technical breakdown of the installation process for developers and advanced users who want to understand exactly what happens during installation.
+This document provides a comprehensive technical breakdown of the YourApp Starter installation process for developers and advanced users who want to understand exactly what happens during setup.
 
 ---
 
